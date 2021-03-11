@@ -12,7 +12,7 @@ NIC=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)' | head -1);
 
 export DEBIAN_FRONTEND=noninteractive
 apt update && apt upgrade -y -f
-apt install -y unzip iptables-persistent fail2ban vnstat net-tools
+apt install -y unzip iptables-persistent fail2ban vnstat net-tools dnsutils tcpdump dsniff grepcidr
 
 # Fail2ban
 cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
