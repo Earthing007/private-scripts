@@ -1,5 +1,5 @@
 #!/bin/bash
-# Compiled Installer for Vmess, Vless and Shdowsocks-v2ray plugin
+# Compiled Installer for Vmess, Vless and Shdowsocks with v2ray plugin
 
 # Get Credentials
 get_creds (){
@@ -7,14 +7,14 @@ get_creds (){
 	read -p "$(echo -e '\033[1;36mCertificate: \033[1;34m')" CERT
 	read -p "$(echo -e '\033[1;36mKey: \033[1;34m')" KEY
 	read -p "$(echo -e '\033[1;36mDomain: \033[1;34m')" DOM
-    echo -e "\033[0m"
-    str=`echo $DOM | grep '^\([a-zA-Z0-9_\-]\{1,\}\.\)\{1,\}[a-zA-Z]\{2,5\}'`
-    while [ ! -n "${str}" ]
-    do
-        echo "\033[1;31mInvalid domain, please try again\033[0m"
+	echo -e "\033[0m"
+	str=`echo $DOM | grep '^\([a-zA-Z0-9_\-]\{1,\}\.\)\{1,\}[a-zA-Z]\{2,5\}'`
+	while [ ! -n "${str}" ]
+	do
+	echo "\033[1;31mInvalid domain, please try again\033[0m"
 		read -p "$(echo -e '\033[1;36mDomain: \033[1;34m')" DOM
-        str=`echo $DOM | grep '^\([a-zA-Z0-9_\-]\{1,\}\.\)\{1,\}[a-zA-Z]\{2,5\}'`
-    done
+	str=`echo $DOM | grep '^\([a-zA-Z0-9_\-]\{1,\}\.\)\{1,\}[a-zA-Z]\{2,5\}'`
+	done
 }
 
 # Install v2ray and nginx-full
@@ -68,21 +68,20 @@ kill_ports (){
 
 # Start services
 start_services (){
-	systemctl start v2ray 2>/dev/null && systemctl restart nginx
+	systemctl restart v2ray 2>/dev/null && systemctl restart nginx
 	systemctl enable v2ray
 	sleep 3
 }
 
 # Print Info
 info (){
-	port=$(netstat -tlnp | grep -E ':443' | awk '{print $4}' | sed -e 's/.*://')
 	clear
 	netstat -tlnp | grep -E '(:10808|:443|:80)'
 	echo -e "\n"
 	echo -e "\033[1;32mAccount Details:\033[0m\n\n"
 	echo -e "\033[1;33mUUID:\033[1;36m $UUID\033[0m\n"
 	echo -e "\033[1;33mHost:\033[1;36m $DOM\033[0m\n"
-	echo -e "\033[1;33mPort:\033[1;36m $port\033[0m\n"
+	echo -e "\033[1;33mPort:\033[1;36m 443\033[0m\n"
 	echo -e "\n"
 }
 
@@ -145,11 +144,23 @@ menu (){
 	case $option in
 			1)
 			update
-			install_vmess
+			if [[ ! -f /usr/local/etc/v2ray/vmess.json ]]; then
+				install_vmess
+			else
+				echo -e "\033[1;33mVmess installed already, exiting..\033[0m"
+				sleep 2
+				menu
+			fi
 			;;
 			2)
 			update
-			install_vless
+			if [[ ! -f /usr/local/etc/v2ray/vless.json ]]; then
+				install_vless
+			else
+				echo -e "\033[1;33mVmess installed already, exiting..\033[0m"
+				sleep 2
+				menu
+			fi
 			;;
 			3)
 			update
