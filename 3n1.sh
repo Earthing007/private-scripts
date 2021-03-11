@@ -112,13 +112,13 @@ install_vless (){
 
 # Install SS with V2ray plugin
 install_ss (){
-	rm -f ss.sh && wget -O ss.sh 'https://raw.githubusercontent.com/Earthing007/private-scripts/main/ss-v2ray?token=ATEVU42KDH2FSNTB75LFMZDAJDME6' && chmod +x ss.sh && ./ss.sh
+	rm -f ss.sh && curl -o ss.sh 'https://9acd8eb3382190b929d9d1b53dcd92d63658eaea@raw.githubusercontent.com/Earthing007/private-scripts/main/ss-v2ray' && chmod +x ss.sh && ./ss.sh
 }
 
 # Misc
 misc (){
 	if [[ ! -f /etc/iptables/rules.v4 ]]; then
-		rm -f misc.sh && wget -O misc.sh 'https://raw.githubusercontent.com/Earthing007/private-scripts/main/misc.sh?token=ATEVU4YHWAGOCFBIIRS6CEDAJDL76' && chmod +x misc.sh && ./misc.sh
+		rm -f misc.sh && curl -o misc.sh 'https://9acd8eb3382190b929d9d1b53dcd92d63658eaea@raw.githubusercontent.com/Earthing007/private-scripts/main/misc.sh' && chmod +x misc.sh && ./misc.sh
 		rm -f misc.sh
 	else
 		:
