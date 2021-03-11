@@ -3,7 +3,8 @@
 
 # Get Credentials
 get_creds (){
-	echo "\n"
+	clear
+	echo -e "\n"
 	read -p "$(echo -e '\033[1;36mCertificate: \033[1;34m')" CERT
 	read -p "$(echo -e '\033[1;36mKey: \033[1;34m')" KEY
 	read -p "$(echo -e '\033[1;36mDomain: \033[1;34m')" DOM
@@ -41,6 +42,7 @@ vmess_conf () {
 	UUID=$(v2ctl uuid)
 	v2rayconf='/usr/local/etc/v2ray/vmess.json' && nginxv2conf='/etc/nginx/conf.d/v2ray.conf' && gistlink='https://gist.github.com/Earthing007/a540470d6042680fbf88fdaa1a8e0e78/raw' && curl -kL "$gistlink/vmess.json" -o $v2rayconf && curl -kL "$gistlink/v2ray.conf" -o $nginxv2conf && sed -i "s|SERVER_DOMAIN|$DOM|g;s|GENERATED_UUID_CODE|$UUID|g" $v2rayconf && sed -i "s|DOMAIN_HERE|$DOM|g" $nginxv2conf
 	rm -rf /etc/nginx/{default.d,conf.d/default.conf,sites-*}
+	rm -f /usr/local/etc/v2ray/config.json && cp /usr/local/etc/v2ray/vmess.json /usr/local/etc/v2ray/config.json
 }
 
 # Configure Vless
@@ -48,6 +50,7 @@ vless_conf (){
 	UUID=$(v2ctl uuid)
 	v2rayconf='/usr/local/etc/v2ray/vless.json' && nginxv2conf='/etc/nginx/conf.d/v2ray.conf' && gistlink='https://gist.github.com/Earthing007/a540470d6042680fbf88fdaa1a8e0e78/raw' && curl -kL "$gistlink/vless.json" -o $v2rayconf && curl -kL "$gistlink/v2ray.conf" -o $nginxv2conf && sed -i "s|SERVER_DOMAIN|$DOM|g;s|GENERATED_UUID_CODE|$UUID|g" $v2rayconf && sed -i "s|DOMAIN_HERE|$DOM|g" $nginxv2conf
 	rm -rf /etc/nginx/{default.d,conf.d/default.conf,sites-*}
+	rm -f /usr/local/etc/v2ray/config.json && cp /usr/local/etc/v2ray/vless.json /usr/local/etc/v2ray/config.json
 }
 
 # Kill ports
@@ -78,9 +81,9 @@ info (){
 	clear
 	netstat -tlnp | grep -E '(:10808|:443|:80)'
 	echo -e "\n"
-	echo -e "\033[1;32mAccount Details:\033[0m\n\n"
-	echo -e "\033[1;33mUUID:\033[1;36m $UUID\033[0m\n"
-	echo -e "\033[1;33mHost:\033[1;36m $DOM\033[0m\n"
+	echo -e "\033[1;32mAccount Details:\033[0m\n"
+	echo -e "\033[1;33mUUID:\033[1;36m $UUID\033[0m"
+	echo -e "\033[1;33mHost:\033[1;36m $DOM\033[0m"
 	echo -e "\033[1;33mPort:\033[1;36m 443\033[0m\n"
 	echo -e "\n"
 }
