@@ -42,7 +42,7 @@ vmess_conf () {
 	UUID=$(v2ctl uuid)
 	v2rayconf='/usr/local/etc/v2ray/vmess.json' && nginxv2conf='/etc/nginx/conf.d/v2ray.conf' && gistlink='https://gist.github.com/Earthing007/a540470d6042680fbf88fdaa1a8e0e78/raw' && curl -kL "$gistlink/vmess.json" -o $v2rayconf && curl -kL "$gistlink/v2ray.conf" -o $nginxv2conf && sed -i "s|SERVER_DOMAIN|$DOM|g;s|GENERATED_UUID_CODE|$UUID|g" $v2rayconf && sed -i "s|DOMAIN_HERE|$DOM|g" $nginxv2conf
 	rm -rf /etc/nginx/{default.d,conf.d/default.conf,sites-*}
-	rm -f /usr/local/etc/v2ray/config.json && cp /usr/local/etc/v2ray/vmess.json /usr/local/etc/v2ray/config.json
+	rm -f /usr/local/etc/v2ray/config.json && cp /usr/local/etc/v2ray/vmess.json /usr/local/etc/v2ray/config.json && rm -f /usr/local/etc/v2ray/vless.json
 }
 
 # Configure Vless
@@ -50,7 +50,7 @@ vless_conf (){
 	UUID=$(v2ctl uuid)
 	v2rayconf='/usr/local/etc/v2ray/vless.json' && nginxv2conf='/etc/nginx/conf.d/v2ray.conf' && gistlink='https://gist.github.com/Earthing007/a540470d6042680fbf88fdaa1a8e0e78/raw' && curl -kL "$gistlink/vless.json" -o $v2rayconf && curl -kL "$gistlink/v2ray.conf" -o $nginxv2conf && sed -i "s|SERVER_DOMAIN|$DOM|g;s|GENERATED_UUID_CODE|$UUID|g" $v2rayconf && sed -i "s|DOMAIN_HERE|$DOM|g" $nginxv2conf
 	rm -rf /etc/nginx/{default.d,conf.d/default.conf,sites-*}
-	rm -f /usr/local/etc/v2ray/config.json && cp /usr/local/etc/v2ray/vless.json /usr/local/etc/v2ray/config.json
+	rm -f /usr/local/etc/v2ray/config.json && cp /usr/local/etc/v2ray/vless.json /usr/local/etc/v2ray/config.json && rm -f /usr/local/etc/v2ray/vmess.json
 }
 
 # Kill ports
