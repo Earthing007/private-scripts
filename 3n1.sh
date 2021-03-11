@@ -59,7 +59,7 @@ kill_ports (){
 		echo -e "\033[1;33mKilling process running on port 80..\033[0m"
 		kill $(lsof -t -i :80)
 	fi
-		if [[ $(netstat -tlnp | grep -E ':443' | awk '{print $4}' | sed -e 's/.*://') = 443 ]]; then
+	if [[ $(netstat -tlnp | grep -E ':443' | awk '{print $4}' | sed -e 's/.*://') = 443 ]]; then
 		echo -e "\033[1;33mKilling process running on port 443..\033[0m"
 		kill $(lsof -t -i :443)
 	fi
