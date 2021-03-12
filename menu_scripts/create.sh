@@ -31,9 +31,9 @@ else
 	ziproxyport="$(netstat -nlpt | grep -i ziproxy | grep -i 0.0.0.0 | awk '{print $4}' | cut -d: -f2 | xargs | sed 's/ /, /g')"
 	squidport="$(netstat -nlpt | grep -i squid | grep -i 0.0.0.0 | awk '{print $4}' | cut -d: -f2 | xargs | sed 's/ /, /g')"
 	openvpnport="$(netstat -nlpt | grep -i openvpn | grep -i 0.0.0.0 | awk '{print $4}' | cut -d: -f2 | xargs | sed 's/ /, /g')"
-	useradd -m -s /bin/false $Expiration $User > /dev/null
+	useradd -m -s /bin/false -e $Expiration $User > /dev/null
 	cat < /etc/passwd | cut -d: -f1 | grep -x -E "^${User}" &> /dev/null
-	echo "$Pass\n$Pass\n" | passwd $User &> /dev/null
+	echo -e "$Pass\n$Pass\n" | passwd $User &> /dev/null
 	banner
 	echo " Your Account Details:"
 	echo ""
