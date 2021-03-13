@@ -13,12 +13,12 @@ if [ $? -eq 0 ]; then
 	echo ""
 	banner
 	echo " User Deleted!"
-	echo "\n"
+	echo -e "\n"
 	return
 else
 	clear
 	banner
 	echo " User you entered does not exist."
-	echo "\n"
+	echo -e "\n"
 	return
 fi
