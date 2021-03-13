@@ -12,21 +12,12 @@ NIC=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)' | head -1);
 
 export DEBIAN_FRONTEND=noninteractive
 apt update && apt upgrade -y -f
-apt install -y unzip iptables-persistent fail2ban vnstat net-tools dnsutils tcpdump dsniff grepcidr
+apt install -y unzip iptables-persistent fail2ban vnstat net-tools
 
 # Fail2ban
 cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
 cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
 systemctl restart fail2ban
-
-# DdoS deflate
-wget -O ddos.zip "https://github.com/jgmdev/ddos-deflate/archive/master.zip"
-unzip ddos.zip
-(cd ddos-deflate-master && ./install.sh)
-rm -f ddos.zip
-sed -i 's/PORT_CONNECTIONS=.*/PORT_CONNECTIONS="1-65535:150:600"/' /etc/ddos/ddos.conf
-systemctl restart ddos
-ddos -d
 
 # Iptables
 cat >> /etc/iptables/rules.v4 << END
