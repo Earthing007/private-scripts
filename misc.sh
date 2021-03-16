@@ -124,10 +124,8 @@ checkBBR () {
 checkBBR
 if [[ $? -eq 0 ]]; then
 	echo -e "\e[1;33mTCP BBR already enabled\e[0m"
-	exit
 elif [[ $kernel -lt 490 ]]; then
 	echo -e "\e[1;31mKernel 4.9 or above is required to enable TCP BBR\e[0m"
-	exit
 else
 	sed -i '/net.core.default_qdisc*/d' /etc/sysctl.conf
 	sed -i '/net.ipv4.tcp_congestion_control*/d' /etc/sysctl.conf
