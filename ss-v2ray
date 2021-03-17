@@ -1,4 +1,7 @@
 #!/bin/sh
+# Shadowsocks-libev with v2ray-plugin installer
+# Copyright (c) 2019 M3chD09
+# Modified by Earthing007
 
 # Check system
 if [ ! -f /etc/lsb-release ];then
