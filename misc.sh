@@ -198,12 +198,18 @@ ulimit -n 51200
 # Setting timezone to GMT+8 PHST
 timedatectl set-timezone Asia/Manila
 
-#Create cron
-##write out current crontab
-crontab -l > mycron
-##echo new cron into cron file
-echo "0 0 * * * /sbin/reboot >/dev/null 2>&1" >> mycron
-##install new cron file
-crontab mycron
-rm mycron
-systemctl enable cron && systemctl restart cron
+# Cron
+if [[ $(netstat -tulpn | grep "ss-server") ]]; then
+	crontab -l > mycron
+	echo "0 0 * * * /sbin/reboot >/dev/null 2>&1" >> mycron
+	echo "0 * * * * systemctl restart shadowsocks >/dev/null 2>&1" >> mycron
+	crontab mycron
+	rm mycron
+	systemctl enable cron && systemctl restart cron
+else
+	crontab -l > mycron
+	echo "0 0 * * * /sbin/reboot >/dev/null 2>&1" >> mycron
+	crontab mycron
+	rm mycron
+	systemctl enable cron && systemctl restart cron
+fi
