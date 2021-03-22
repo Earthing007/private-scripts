@@ -179,8 +179,8 @@ menu (){
 			;;
 			4)
 			misc
-			[[ $(netstat -tulpn | grep "nginx") ]] && systemctl restart v2ray && systemctl restart nginx && echo -e "${GR}done${NC}"
-			[[ $(netstat -tulpn | grep "ss-server") ]] && systemctl restart shadowsocks && echo -e "${CY}done${NC}"
+			[[ $(netstat -tulpn | grep "nginx") ]] && systemctl restart v2ray && systemctl restart nginx && echo -e "${GR}Please reboot now to apply changes${NC}"
+			[[ $(netstat -tulpn | grep "ss-server") ]] && systemctl restart shadowsocks && echo -e "${CY}Please reboot now to apply changes${NC}"
 			;;			
 			*)
 			echo -e "${RD}Invalid, please try again.${NC}\n"
