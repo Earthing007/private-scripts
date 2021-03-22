@@ -57,6 +57,9 @@ pre_install(){
     echo "\033[1;34mStart installing. This may take a while.\033[0m"
     apt-get update
     apt-get install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake
+    [[ ! "$(command -v base64)" ]] && apt install -y coreutils
+    apt install -y python3-pip
+    pip3 install qrcode
 }
 
 
@@ -200,13 +203,16 @@ remove_files(){
 
 print_ss_info(){
     clear
-    echo "\033[1;32mAccount details\033[0m"
-    echo "Your Server IP        :  ${domain} "
-    echo "Your Server Port      :  443 "
-    echo "Your Password         :  ${shadowsockspwd} "
-    echo "Your Encryption Method:  aes-256-gcm "
-    echo "Your Plugin           :  v2ray-plugin"
-    echo "Your Plugin options   :  tls;host=${domain}"
+    DATE=$(date --rfc-3339=date)
+    LOC=$(curl -sk ipinfo.io/region)
+    echo -e "\n"
+    echo "\033[1;32mAccount details:\033[0m"
+    echo -e "\n"
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64`@104.17.64.3:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE} > URI.txt
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64`@104.17.64.3:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE} | qr
+    echo -e "\n"
+    cat URI.txt
+    echo -e "\n"
 }
 
 install_all(){
