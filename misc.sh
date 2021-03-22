@@ -123,7 +123,7 @@ apt-get update
 # sudo apt-get remove speedtest-cli
 apt-get install speedtest
 
-#BBR
+# BBR
 kernel=$(uname -r | awk -F- '{print $1}' | tr -d '.')
 checkBBR () {
 	if [[ $(sysctl net.ipv4.tcp_congestion_control | awk -F= '{print $2}') = " bbr" ]]; then
@@ -145,7 +145,7 @@ else
 	sysctl -p >/dev/null 2>&1
 	checkBBR
 	if [[ $? -eq 0 ]]; then
-		echo -e "\e[1;32mTCP BBR enabled successfully, please reboot now to apply changes.\e[0m"
+		echo -e "\e[1;32mTCP BBR enabled successfully.\e[0m"
 	else
 		echo -e "\e[1;31mFailed to enable TCP BBR.\e[0m"
 	fi
@@ -209,18 +209,19 @@ ulimit -n 51200
 # Setting timezone to GMT+8 PHST
 timedatectl set-timezone Asia/Manila
 
-# Cron
+cat >> /etc/exert/clear_cache.sh << END
+#!/bin/bash
+
+sync && echo 3 > /proc/sys/vm/drop_caches
 if [[ $(netstat -tulpn | grep "ss-server") ]]; then
-	crontab -l > mycron
-	echo "0 0 * * * /sbin/reboot >/dev/null 2>&1" >> mycron
-	echo "0 * * * * systemctl restart shadowsocks >/dev/null 2>&1" >> mycron
-	crontab mycron
-	rm mycron
-	systemctl enable cron && systemctl restart cron
-else
-	crontab -l > mycron
-	echo "0 0 * * * /sbin/reboot >/dev/null 2>&1" >> mycron
-	crontab mycron
-	rm mycron
-	systemctl enable cron && systemctl restart cron
+	systemctl restart shadowsocks
 fi
+END
+chmod +x /etc/exert/clear_cache.sh
+
+# Cron
+crontab -l > mycron
+echo "*/5 * * * * /etc/exert/clear_cache.sh >/dev/null 2>&1" >> mycron
+crontab mycron
+rm mycron
+systemctl enable cron && systemctl restart cron
