@@ -52,7 +52,13 @@ vless_conf (){
 	rm -rf /etc/nginx/{default.d,conf.d/default.conf,sites-*}
 	rm -f /usr/local/etc/v2ray/config.json && cp /usr/local/etc/v2ray/vless.json /usr/local/etc/v2ray/config.json && rm -f /usr/local/etc/v2ray/vmess.json
 	rm -f vless_client.json
-	vless_client='https://gist.githubusercontent.com/Earthing007/bfd609dc57e0760bc7e620752c34116c/raw/vless_client.json' && curl -kL "$vless_client" -o vless_client.json && sed -i "s|SERVER_DOMAIN|$DOM|g;s|GENERATED_UUID_CODE|$UUID|g" vless_client.json
+	vless_client='https://gist.githubusercontent.com/Earthing007/bfd609dc57e0760bc7e620752c34116c/raw/vless_client.json' && curl -kL "$vless_client" -o vless_client_GTM.json && sed -i "s|SERVER_DOMAIN|$DOM|g;s|GENERATED_UUID_CODE|$UUID|g" vless_client_GTM.json
+	for JSON in "vless_client_STS.json" "vless_client_GOMO.json"; do cp vless_client_GTM.json $JSON; done
+	sed -i "s|104.17.64.3|104.20.184.68|g" vless_client_STS.json
+	sed -i "s|104.17.64.3|104.18.1.27|g" vless_client_GOMO.json
+	DATE=$(date --rfc-3339=date)
+	LOC=$(curl -sk ipinfo.io/region)
+	zip vless_${LOC}_${DATE}.zip vless_client_GOMO.json vless_client_STS.json vless_client_STS.json
 }
 
 # Kill ports
@@ -130,7 +136,7 @@ misc (){
 update (){
 	export DEBIAN_FRONTEND=noninteractive
 	apt update && apt upgrade -y -f
-	apt install curl wget unzip net-tools lsof -y
+	apt install curl wget zip unzip net-tools lsof -y
 }
 
 menu (){
