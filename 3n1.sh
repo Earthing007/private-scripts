@@ -58,7 +58,7 @@ vless_conf (){
 	sed -i "s|104.17.64.3|104.18.1.27|g" vless_client_GOMO.json
 	DATE=$(date --rfc-3339=date)
 	LOC=$(curl -sk ipinfo.io/region)
-	zip vless_${LOC}_${DATE}.zip vless_client_GOMO.json vless_client_STS.json vless_client_STS.json
+	zip vless_${LOC}_${DATE}.zip vless_client_GOMO.json vless_client_STS.json vless_client_GTM.json
 }
 
 # Kill ports
