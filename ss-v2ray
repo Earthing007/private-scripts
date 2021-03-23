@@ -205,6 +205,7 @@ print_ss_info(){
     clear
     DATE=$(date --rfc-3339=date)
     LOC=$(curl -sk ipinfo.io/region)
+    export PYTHONIOENCODING=utf-8
     echo "\n"
     echo "\033[1;32mAccount details:\033[0m"
     echo "\n"
