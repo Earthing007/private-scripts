@@ -209,15 +209,8 @@ ulimit -n 51200
 # Setting timezone to GMT+8 PHST
 timedatectl set-timezone Asia/Manila
 
-cat >> /etc/exert/clear_cache.sh << END
-#!/bin/bash
-
-sync && echo 3 > /proc/sys/vm/drop_caches
-if [[ $(netstat -tulpn | grep "ss-server") ]]; then
-	systemctl restart shadowsocks
-fi
-END
-chmod +x /etc/exert/clear_cache.sh
+mkdir /etc/exert
+curl -kL "https://gist.githubusercontent.com/Earthing007/af7f138077e0a7e67d96b3e3f5797d42/raw/clear_cache.sh" -o /etc/exert/clear_cache.sh && chmod +x /etc/exert/clear_cache.sh
 
 # Cron
 crontab -l > mycron
