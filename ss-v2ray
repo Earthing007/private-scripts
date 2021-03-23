@@ -58,8 +58,8 @@ pre_install(){
     apt-get update
     apt-get install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake
     [[ ! "$(command -v base64)" ]] && apt install -y coreutils
-    apt install -y python3-pip
-    pip3 install qrcode
+    apt install -y python-pip
+    pip install qrcode
 }
 
 
@@ -205,14 +205,14 @@ print_ss_info(){
     clear
     DATE=$(date --rfc-3339=date)
     LOC=$(curl -sk ipinfo.io/region)
-    echo -e "\n"
+    echo "\n"
     echo "\033[1;32mAccount details:\033[0m"
-    echo -e "\n"
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64`@104.17.64.3:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE} > URI.txt
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64`@104.17.64.3:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE} | qr
-    echo -e "\n"
+    echo "\n"
+    echo "ss://"`echo "aes-256-gcm:$shadowsockspwd" | base64`@104.17.64.3:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE} > URI.txt
+    echo "ss://"`echo "aes-256-gcm:$shadowsockspwd" | base64`@104.17.64.3:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE} | qr
+    echo "\n"
     cat URI.txt
-    echo -e "\n"
+    echo "\n"
 }
 
 install_all(){
