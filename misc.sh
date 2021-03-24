@@ -12,7 +12,7 @@ NIC=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)' | head -1);
 
 export DEBIAN_FRONTEND=noninteractive
 apt update && apt upgrade -y -f
-apt install -y unzip iptables-persistent fail2ban vnstat net-tools
+apt install -y unzip iptables-persistent fail2ban vnstat net-tools ipset
 
 # Fail2ban
 cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
@@ -102,11 +102,51 @@ cat >> /etc/iptables/rules.v4 << END
 -A OUTPUT -m string --string "find_node" --algo kmp -j REJECT --reject-with icmp-port-unreachable
 -A OUTPUT -m string --string "get_peers" --algo kmp -j REJECT --reject-with icmp-port-unreachable
 
+# PortScan_protection
+-A INPUT -m state --state INVALID -j DROP
+-A INPUT -m state --state NEW -m set ! --match-set scanned_ports src,dst -m hashlimit --hashlimit-above 1/hour --hashlimit-burst 5 --hashlimit-mode srcip --hashlimit-name portscan --hashlimit-htable-expire 10000 -j SET --add-set port_scanners src --exist
+-A INPUT -m state --state NEW -m set --match-set port_scanners src -j DROP
+-A INPUT -m state --state NEW -j SET --add-set scanned_ports src,dst
+
 -A f2b-sshd -j RETURN
 COMMIT
 END
-
 sed -i "s/xxxxxxxxx/$IP/" /etc/iptables/rules.v4
+
+cat >> /etc/systemd/system/ipset-persistent.service << END
+[Unit]
+Description=ipset persistent configuration
+Before=network.target
+
+# ipset sets should be loaded before iptables
+# Because creating iptables rules with names of non-existent sets is not possible
+Before=netfilter-persistent.service
+Before=ufw.service
+
+ConditionFileNotEmpty=/etc/iptables/ipset
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/ipset restore -file /etc/iptables/ipset
+# Uncomment to save changed sets on reboot
+ExecStop=/sbin/ipset save -file /etc/iptables/ipset
+ExecStop=/sbin/ipset flush
+ExecStopPost=/sbin/ipset destroy
+
+[Install]
+WantedBy=multi-user.target
+
+RequiredBy=netfilter-persistent.service
+RequiredBy=ufw.service
+END
+
+ipset create port_scanners hash:ip family inet hashsize 32768 maxelem 65536 timeout 600
+ipset create scanned_ports hash:ip,port family inet hashsize 32768 maxelem 65536 timeout 60
+ipset save > /etc/iptables/ipset
+
+systemctl daemon-reload
+systemctl enable ipset-persistent.service
 
 iptables-restore < /etc/iptables/rules.v4
 netfilter-persistent save
