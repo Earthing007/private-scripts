@@ -156,7 +156,7 @@ systemctl enable netfilter-persistent
 apt-get install -y gnupg1 apt-transport-https dirmngr
 export INSTALL_KEY=379CE192D401AB61
 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $INSTALL_KEY
-echo "deb https://ookla.bintray.com/debian generic main" | sudo tee  /etc/apt/sources.list.d/speedtest.list
+echo "deb https://ookla.bintray.com/debian generic main" | tee  /etc/apt/sources.list.d/speedtest.list
 apt-get update
 # Other non-official binaries will conflict with Speedtest CLI
 # Example how to remove using apt-get
