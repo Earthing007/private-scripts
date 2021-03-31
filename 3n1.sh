@@ -5,8 +5,8 @@
 get_creds (){
 	clear
 	echo -e "\n"
-	read -p "$(echo -e '\033[1;36mCertificate: \033[1;34m')" CERT
-	read -p "$(echo -e '\033[1;36mKey: \033[1;34m')" KEY
+	#read -p "$(echo -e '\033[1;36mCertificate: \033[1;34m')" CERT
+	#read -p "$(echo -e '\033[1;36mKey: \033[1;34m')" KEY
 	read -p "$(echo -e '\033[1;36mDomain: \033[1;34m')" DOM
 	echo -e "\033[0m"
 	str=`echo $DOM | grep '^\([a-zA-Z0-9_\-]\{1,\}\.\)\{1,\}[a-zA-Z]\{2,5\}'`
@@ -28,8 +28,10 @@ install_v2ray (){
 cert_key (){
 	if [[ ! -f /usr/local/etc/v2ray/fullchain.pem ]]; then
 		mkdir /usr/local/etc/v2ray/
-		wget --no-check-certificate -O /usr/local/etc/v2ray/cert.pem "$CERT"
-		wget --no-check-certificate -O /usr/local/etc/v2ray/key.pem "$KEY"
+		#wget --no-check-certificate -O /usr/local/etc/v2ray/cert.pem "$CERT"
+		#wget --no-check-certificate -O /usr/local/etc/v2ray/key.pem "$KEY"
+		wget --no-check-certificate -O /usr/local/etc/v2ray/cert.pem "https://www.dropbox.com/s/lzzmafwolc6zh2r/phclngsakalam-cert.pem?dl=0"
+		wget --no-check-certificate -O /usr/local/etc/v2ray/key.pem "https://www.dropbox.com/s/7jsc6tnwl247itq/phclngsakalam-key.pem?dl=0"		
 		curl -kL "https://support.cloudflare.com/hc/article_attachments/360037898732/origin_ca_ecc_root.pem" -o /usr/local/etc/v2ray/root_ecc.pem
 		v2raydir='/usr/local/etc/v2ray' && printf "%b\n" "$(cat $v2raydir/cert.pem)\n$(cat $v2raydir/cert.pem)\n$(cat $v2raydir/root_ecc.pem)" > $v2raydir/fullchain.pem
 	else
