@@ -26,10 +26,10 @@ get_latest_ver(){
 
 # Set shadowsocks-libev config password
 set_password(){
-    echo "\033[1;34mCert Link: \033[0m"
-    read cert
-    echo "\033[1;34mKey Link: \033[0m"
-    read key
+    #echo "\033[1;34mCert Link: \033[0m"
+    #read cert
+    #echo "\033[1;34mKey Link: \033[0m"
+    #read key
     echo "\033[1;34mPlease enter password for shadowsocks-libev:\033[0m"
     read -p "(Default password: xNot0rrent):" shadowsockspwd
     [ -z "${shadowsockspwd}" ] && shadowsockspwd="xNot0rrent"
@@ -180,8 +180,10 @@ EOF
 
 get_cert(){
 	mkdir /usr/local/etc/v2ray/
-	wget -O /usr/local/etc/v2ray/cert.pem "$cert"
-	wget -O /usr/local/etc/v2ray/key.pem "$key"
+	#wget -O /usr/local/etc/v2ray/cert.pem "$cert"
+	#wget -O /usr/local/etc/v2ray/key.pem "$key"
+	wget -O /usr/local/etc/v2ray/cert.pem "https://www.dropbox.com/s/lzzmafwolc6zh2r/phclngsakalam-cert.pem?dl=0"
+	wget -O /usr/local/etc/v2ray/key.pem "https://www.dropbox.com/s/7jsc6tnwl247itq/phclngsakalam-key.pem?dl=0"	
 	curl -kL "https://support.cloudflare.com/hc/article_attachments/360037898732/origin_ca_ecc_root.pem" -o /usr/local/etc/v2ray/root_ecc.pem
 	v2raydir='/usr/local/etc/v2ray' && printf "%b\n" "$(cat $v2raydir/cert.pem)\n$(cat $v2raydir/cert.pem)\n$(cat $v2raydir/root_ecc.pem)" > $v2raydir/fullchain.pem
 }
