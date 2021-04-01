@@ -22,15 +22,14 @@ systemctl restart fail2ban
 # Iptables
 cat >> /etc/iptables/rules.v4 << END
 *filter
-:INPUT DROP [0:0]
+:INPUT ACCEPT [0:0]
 :FORWARD ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :f2b-sshd - [0:0]
 -A INPUT -p tcp -m multiport --dports 22 -j f2b-sshd
 
--A INPUT -i $NIC -p tcp -m state --state NEW,ESTABLISHED --dport 22 -j ACCEPT
--A INPUT -i $NIC -p udp -m state --state NEW,ESTABLISHED --dport 53 -j ACCEPT
--A INPUT -i $NIC -p tcp -m state --state NEW,ESTABLISHED --dport 443 -j ACCEPT
+-A INPUT -s $IP/32 -p tcp -m multiport --dports 1:65535 -j ACCEPT
+-A INPUT -s $IP/32 -p udp -m multiport --dports 1:65535 -j ACCEPT
 
 #Torrent
 -A FORWARD -p tcp -i $NIC --dport 6881:6889 -d $IP -j REJECT
@@ -111,7 +110,6 @@ cat >> /etc/iptables/rules.v4 << END
 
 -A f2b-sshd -j RETURN
 
--A INPUT -j DROP
 COMMIT
 END
 sed -i "s/xxxxxxxxx/$IP/" /etc/iptables/rules.v4
