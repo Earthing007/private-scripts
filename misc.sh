@@ -26,6 +26,7 @@ cat >> /etc/iptables/rules.v4 << END
 -A INPUT -p tcp -m multiport --dports 22 -j f2b-sshd
 
 -A INPUT -i $NIC -p tcp -m state --state NEW,ESTABLISHED --dport 22 -j ACCEPT
+-A INPUT -i $NIC -p tcp -m state --state NEW,ESTABLISHED --dport 53 -j ACCEPT
 -A INPUT -i $NIC -p tcp -m state --state NEW,ESTABLISHED --dport 443 -j ACCEPT
 
 -A INPUT -s $IP/32 -p tcp -m multiport --dports 1:65535 -j ACCEPT
