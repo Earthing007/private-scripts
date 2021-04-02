@@ -58,7 +58,7 @@ pre_install(){
     apt-get update
     apt-get install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake
     [[ ! "$(command -v base64)" ]] && apt install -y coreutils
-    apt install -y python3-pip
+    apt install -y python3-pip zip
     pip3 install qrcode
 }
 
@@ -215,13 +215,17 @@ print_ss_info(){
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.1.27:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO >> URI.txt
     echo "GTM"
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM | qr
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM | qr > ${LOC}_${DATE}_GTM.png 
     echo "STS"
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.20.184.68:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM | qr
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.20.184.68:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS | qr
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.20.184.68:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS | qr > ${LOC}_${DATE}_STS.png
     echo "GOMO"
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.1.27:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM | qr
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.1.27:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO | qr
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.1.27:443?plugin=v2ray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO | qr > ${LOC}_${DATE}_GOMO.png 
     echo "\n"
     cat URI.txt
     echo "\n"
+    zip shadowsocks_${LOC}_${DATE}.zip '*.png'
 }
 
 install_all(){
