@@ -226,7 +226,7 @@ print_ss_info(){
     echo "\n"
     cat URI.txt
     echo "\n"
-    zip shadowsocks_${LOC}_${DATE}.zip '*.png'
+    zip shadowsocks_${LOC}_${DATE}.zip *.png
 }
 
 install_all(){
