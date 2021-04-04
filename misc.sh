@@ -35,12 +35,11 @@ cat >> /etc/iptables/rules.v4 << END
 -A OUTPUT -j ACCEPT
 
 # Allows SSH, HTTP and HTTPS connections from anywhere 
--A INPUT -p tcp -m state --state NEW,ESTABLISHED --dport 22 -j ACCEPT
--A INPUT -p tcp --dport 80 -j ACCEPT
--A INPUT -p tcp --dport 443 -j ACCEPT
--A INPUT -p udp -m state --state ESTABLISHED --sport 53 -j ACCEPT
--A INPUT -p tcp -m state --state ESTABLISHED --sport 80 -j ACCEPT
--A INPUT -p tcp -m state --state ESTABLISHED --sport 443 -j ACCEPT
+-A INPUT -i $NIC -p tcp -m state --state NEW,ESTABLISHED --dport 22 -j ACCEPT
+-A INPUT -i $NIC -p tcp --dport 80 -j ACCEPT
+-A INPUT -i $NIC -p tcp --dport 443 -j ACCEPT
+-A INPUT -i $NIC -p udp -m state --state ESTABLISHED --sport 53 -j ACCEPT
+-A INPUT -i $NIC -p udp -m state --state NEW,ESTABLISHED --dport 53 -j ACCEPT
 
 #Torrent
 -A FORWARD -p tcp -i $NIC --dport 6881:6889 -d $IP -j REJECT
