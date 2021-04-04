@@ -22,14 +22,25 @@ systemctl restart fail2ban
 # Iptables
 cat >> /etc/iptables/rules.v4 << END
 *filter
-:INPUT ACCEPT [0:0]
-:FORWARD ACCEPT [0:0]
-:OUTPUT ACCEPT [0:0]
-:f2b-sshd - [0:0]
 -A INPUT -p tcp -m multiport --dports 22 -j f2b-sshd
 
--A INPUT -s $IP/32 -p tcp -m multiport --dports 1:65535 -j ACCEPT
--A INPUT -s $IP/32 -p udp -m multiport --dports 1:65535 -j ACCEPT
+# Allows all loopback (lo0) traffic and drop all traffic to 127/8 that doesn't use lo0
+-A INPUT -i lo -j ACCEPT
+-A INPUT ! -i lo -d 127.0.0.0/8 -j REJECT
+
+# Accepts all established inbound connections
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Allows all outbound traffic
+-A OUTPUT -j ACCEPT
+
+# Allows SSH, HTTP and HTTPS connections from anywhere 
+-A INPUT -p tcp -m state --state NEW,ESTABLISHED --dport 22 -j ACCEPT
+-A INPUT -p tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp --dport 443 -j ACCEPT
+-A INPUT -p udp -m state --state ESTABLISHED --sport 53 -j ACCEPT
+-A INPUT -p tcp -m state --state ESTABLISHED --sport 80 -j ACCEPT
+-A INPUT -p tcp -m state --state ESTABLISHED --sport 443 -j ACCEPT
 
 #Torrent
 -A FORWARD -p tcp -i $NIC --dport 6881:6889 -d $IP -j REJECT
@@ -108,8 +119,11 @@ cat >> /etc/iptables/rules.v4 << END
 -A INPUT -m state --state NEW -m set --match-set port_scanners src -j DROP
 -A INPUT -m state --state NEW -j SET --add-set scanned_ports src,dst
 
--A f2b-sshd -j RETURN
+# Drop
+-A INPUT -j DROP
+-A FORWARD -j DROP
 
+-A f2b-sshd -j RETURN
 COMMIT
 END
 sed -i "s/xxxxxxxxx/$IP/" /etc/iptables/rules.v4
@@ -255,7 +269,7 @@ curl -kL "https://gist.githubusercontent.com/Earthing007/af7f138077e0a7e67d96b3e
 
 # Cron
 crontab -l > mycron
-echo "*/5 * * * * /etc/exert/clear_cache.sh >/dev/null 2>&1" >> mycron
+echo "0 * * * * /etc/exert/clear_cache.sh >/dev/null 2>&1" >> mycron
 crontab mycron
 rm mycron
 systemctl enable cron && systemctl restart cron
