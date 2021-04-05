@@ -98,7 +98,9 @@ info (){
 	echo -e "\n"
 	DATE=$(date --rfc-3339=date)
 	LOC=$(curl -sk ipinfo.io/region)
-	if [[ -s /usr/local/etc/v2ray/vless.json ]]; then
+	if [[ ! -f /usr/local/etc/v2ray/vless.json ]]; then
+		:
+	else	
 		echo "vless://"`v2ctl uuid`@104.17.64.3:443?path=%2F&security=tls&encryption=none&host=${DOM}&type=ws#exertconf_${LOC}_${DATE}_GTM | qr
 		echo "vless://"`v2ctl uuid`@104.17.64.3:443?path=%2F&security=tls&encryption=none&host=${DOM}&type=ws#exertconf_${LOC}_${DATE}_GTM | qr > vless_${LOC}_${DATE}_GTM.png
 	fi
