@@ -101,8 +101,9 @@ info (){
 	if [[ ! -f /usr/local/etc/v2ray/vless.json ]]; then
 		:
 	else	
-		echo "vless://"`v2ctl uuid`@104.17.64.3:443?path=%2F&security=tls&encryption=none&host=${DOM}&type=ws#exertconf_${LOC}_${DATE}_GTM | qr
-		echo "vless://"`v2ctl uuid`@104.17.64.3:443?path=%2F&security=tls&encryption=none&host=${DOM}&type=ws#exertconf_${LOC}_${DATE}_GTM | qr > vless_${LOC}_${DATE}_GTM.png
+		id=$(cat /usr/local/etc/v2ray/vless.json | grep -i "id" | awk '{print $2}' | tr -d '",')
+		echo "vless://${id}@104.17.64.3:443?path=%2F&security=tls&encryption=none&host=${DOM}&type=ws#exertconf_${LOC}_${DATE}_GTM" | qr
+		echo "vless://${id}@104.17.64.3:443?path=%2F&security=tls&encryption=none&host=${DOM}&type=ws#exertconf_${LOC}_${DATE}_GTM" | qr > vless_${LOC}_${DATE}_GTM.png
 	fi
 }
 
