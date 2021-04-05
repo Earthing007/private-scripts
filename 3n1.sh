@@ -96,6 +96,12 @@ info (){
 	echo -e "\033[1;33mHost:\033[1;36m $DOM\033[0m"
 	echo -e "\033[1;33mPort:\033[1;36m 443\033[0m\n"
 	echo -e "\n"
+	DATE=$(date --rfc-3339=date)
+	LOC=$(curl -sk ipinfo.io/region)
+	if [[ ! -s /usr/local/etc/v2ray/vless.json ]]; then
+		echo "vless://"`v2ctl uuid`@104.17.64.3:443?path=%2F&security=tls&encryption=none&host=${DOM}&type=ws#exertconf_${LOC}_${DATE}_GTM | qr
+		echo "vless://"`v2ctl uuid`@104.17.64.3:443?path=%2F&security=tls&encryption=none&host=${DOM}&type=ws#exertconf_${LOC}_${DATE}_GTM | qr > vless_${LOC}_${DATE}_GTM.png
+	fi
 }
 
 # Install Vmess
@@ -138,7 +144,10 @@ misc (){
 update (){
 	export DEBIAN_FRONTEND=noninteractive
 	apt update && apt upgrade -y -f
-	apt install curl wget zip unzip net-tools lsof -y
+	apt install curl wget zip unzip net-tools lsof python-pip zip -y
+	[[ ! "$(command -v base64)" ]] && apt install -y coreutils
+	pip install qrcode
+	pip install pillow
 }
 
 menu (){
@@ -157,7 +166,7 @@ menu (){
 	case $option in
 			1)
 			update
-			if [[ ! -f /usr/local/etc/v2ray/vmess.json ]]; then
+			if [[ ! -s /usr/local/etc/v2ray/vmess.json ]]; then
 				install_vmess
 			else
 				echo -e "\033[1;33mVmess installed already, exiting..\033[0m"
@@ -167,7 +176,7 @@ menu (){
 			;;
 			2)
 			update
-			if [[ ! -f /usr/local/etc/v2ray/vless.json ]]; then
+			if [[ ! -s /usr/local/etc/v2ray/vless.json ]]; then
 				install_vless
 			else
 				echo -e "\033[1;33mVmess installed already, exiting..\033[0m"
