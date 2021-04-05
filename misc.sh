@@ -22,6 +22,7 @@ systemctl restart fail2ban
 # Iptables
 cat >> /etc/iptables/rules.v4 << END
 *filter
+:f2b-sshd - [0:0]
 -A INPUT -p tcp -m multiport --dports 22 -j f2b-sshd
 
 # Allows all loopback (lo0) traffic and drop all traffic to 127/8 that doesn't use lo0
