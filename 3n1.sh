@@ -109,7 +109,6 @@ info (){
 
 # Install Vmess
 install_vmess (){
-	get_creds
 	install_v2ray
 	cert_key
 	vmess_conf
@@ -120,7 +119,6 @@ install_vmess (){
 
 # Install Vless
 install_vless (){
-	get_creds
 	install_v2ray
 	cert_key
 	vless_conf
@@ -168,6 +166,7 @@ menu (){
 	read -p "$(echo -e 'Choose from options \e[32m[\e[0m1-4\e[32m]\e[0m: ')" option
 	case $option in
 			1)
+			get_creds
 			update
 			if [[ ! -s /usr/local/etc/v2ray/vmess.json ]]; then
 				install_vmess
@@ -178,6 +177,7 @@ menu (){
 			fi
 			;;
 			2)
+			get_creds
 			update
 			if [[ ! -s /usr/local/etc/v2ray/vless.json ]]; then
 				install_vless
