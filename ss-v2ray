@@ -30,10 +30,11 @@ set_password(){
     #read cert
     #echo "\033[1;34mKey Link: \033[0m"
     #read key
-    echo "\033[1;34mPlease enter password for shadowsocks-libev:\033[0m"
-    read -p "(Default password: Not0rrentPlease):" shadowsockspwd
-    [ -z "${shadowsockspwd}" ] && shadowsockspwd="Not0rrentPlease"
-    echo "\033[1;35mpassword = ${shadowsockspwd}\033[0m"
+    #echo "\033[1;34mPlease enter password for shadowsocks-libev:\033[0m"
+    #read -p "(Default password: Not0rrentPlease):" shadowsockspwd
+    #[ -z "${shadowsockspwd}" ] && shadowsockspwd="Not0rrentPlease"
+    #echo "\033[1;35mpassword = ${shadowsockspwd}\033[0m"
+    shadowsockspwd=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 12)
 }
 
 # Set domain
