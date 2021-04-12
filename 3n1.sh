@@ -149,6 +149,8 @@ update (){
 	[[ ! "$(command -v base64)" ]] && apt install -y coreutils
 	pip install qrcode
 	pip install pillow
+	# Setting timezone to GMT+8 PHST
+	timedatectl set-timezone Asia/Manila
 }
 
 menu (){
