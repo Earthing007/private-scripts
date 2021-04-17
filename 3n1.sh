@@ -56,7 +56,8 @@ vless_conf (){
 	rm -f vless_client.json
 	vless_client='https://gist.githubusercontent.com/Earthing007/bfd609dc57e0760bc7e620752c34116c/raw/vless_client.json' && curl -kL "$vless_client" -o vless_client_GTM.json && sed -i "s|SERVER_DOMAIN|$DOM|g;s|GENERATED_UUID_CODE|$UUID|g" vless_client_GTM.json
 	for JSON in "vless_client_STS.json" "vless_client_GOMO.json"; do cp vless_client_GTM.json $JSON; done
-	sed -i "s|104.17.64.3|104.31.81.190|g" vless_client_STS.json
+	sed -i "s|104.17.64.3|45.60.158.66|g" vless_client_STS.json
+	sed -i "s|${DOM}|phcpubd.ml|g" vless_client_STS.json
 	sed -i "s|104.17.64.3|104.18.1.27|g" vless_client_GOMO.json
 	DATE=$(date --rfc-3339=date)
 	LOC=$(curl -sk ipinfo.io/region)
