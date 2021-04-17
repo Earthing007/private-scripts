@@ -103,8 +103,8 @@ info (){
 		:
 	else	
 		id=$(cat /usr/local/etc/v2ray/vless.json | grep -i "id" | awk '{print $2}' | tr -d '",')
-		echo "vless://${id}@104.31.81.190:443?path=%2F&security=tls&encryption=none&host=${DOM}&type=ws#exertconf_${LOC}_${DATE}_STS" | qr
-		echo "vless://${id}@104.31.81.190:443?path=%2F&security=tls&encryption=none&host=${DOM}&type=ws#exertconf_${LOC}_${DATE}_STS" | qr > vless_${LOC}_${DATE}_STS.png
+		echo "vless://${id}@45.60.158.66:443?path=%2F&security=tls&encryption=none&host=phcpubd.ml&type=ws#exertconf_${LOC}_${DATE}_STS" | qr
+		echo "vless://${id}@45.60.158.66:443?path=%2F&security=tls&encryption=none&host=phcpubd.ml&type=ws#exertconf_${LOC}_${DATE}_STS" | qr > vless_${LOC}_${DATE}_STS.png
 	fi
 }
 
