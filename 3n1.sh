@@ -57,7 +57,7 @@ vless_conf (){
 	vless_client='https://gist.githubusercontent.com/Earthing007/bfd609dc57e0760bc7e620752c34116c/raw/vless_client.json' && curl -kL "$vless_client" -o vless_client_GTM.json && sed -i "s|SERVER_DOMAIN|$DOM|g;s|GENERATED_UUID_CODE|$UUID|g" vless_client_GTM.json
 	for JSON in "vless_client_STS.json" "vless_client_GOMO.json"; do cp vless_client_GTM.json $JSON; done
 	sed -i "s|104.17.64.3|45.60.158.66|g" vless_client_STS.json
-	sed -i "s|${DOM}|phcpubd.ml|g" vless_client_STS.json
+	sed -i "s|${DOM}|nice-one.ml|g" vless_client_STS.json
 	sed -i "s|104.17.64.3|104.18.1.27|g" vless_client_GOMO.json
 	DATE=$(date --rfc-3339=date)
 	LOC=$(curl -sk ipinfo.io/region)
@@ -103,8 +103,8 @@ info (){
 		:
 	else	
 		id=$(cat /usr/local/etc/v2ray/vless.json | grep -i "id" | awk '{print $2}' | tr -d '",')
-		echo "vless://${id}@45.60.158.66:443?path=%2F&security=tls&encryption=none&host=phcpubd.ml&type=ws#exertconf_${LOC}_${DATE}_STS" | qr
-		echo "vless://${id}@45.60.158.66:443?path=%2F&security=tls&encryption=none&host=phcpubd.ml&type=ws#exertconf_${LOC}_${DATE}_STS" | qr > vless_${LOC}_${DATE}_STS.png
+		echo "vless://${id}@45.60.158.66:443?path=%2F&security=tls&encryption=none&host=nice-one.ml&type=ws#exertconf_${LOC}_${DATE}_STS" | qr
+		echo "vless://${id}@45.60.158.66:443?path=%2F&security=tls&encryption=none&host=nice-one.ml&type=ws#exertconf_${LOC}_${DATE}_STS" | qr > vless_${LOC}_${DATE}_STS.png
 	fi
 }
 
