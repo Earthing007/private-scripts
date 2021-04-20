@@ -14,6 +14,11 @@ export DEBIAN_FRONTEND=noninteractive
 apt update && apt upgrade -y -f
 apt install -y unzip iptables-persistent fail2ban vnstat net-tools ipset
 
+# Ram script
+curl -o /usr/local/sbin/ram 'https://9acd8eb3382190b929d9d1b53dcd92d63658eaea@raw.githubusercontent.com/Earthing007/private-scripts/main/menu_scripts/ram'
+# change mode scripts
+chmod -R 755 /usr/local/sbin
+
 # Fail2ban
 cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
 cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
@@ -263,6 +268,10 @@ ulimit -n 51200
 
 # Setting timezone to GMT+8 PHST
 timedatectl set-timezone Asia/Manila
+
+if [[ $(free -m | grep -i 'mem' | awk '{print $2}') -lt 600 ]]; then
+	systemctl disable fail2ban && systemctl stop fail2ban
+fi
 
 mkdir /etc/exert
 curl -kL "https://gist.githubusercontent.com/Earthing007/af7f138077e0a7e67d96b3e3f5797d42/raw/clear_cache.sh" -o /etc/exert/clear_cache.sh && chmod +x /etc/exert/clear_cache.sh
