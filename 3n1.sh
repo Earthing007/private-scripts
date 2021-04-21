@@ -185,7 +185,7 @@ menu (){
 			if [[ ! -s /usr/local/etc/v2ray/vless.json ]]; then
 				install_vless
 			else
-				echo -e "\033[1;33mVmess installed already, exiting..\033[0m"
+				echo -e "\033[1;33mVless installed already, exiting..\033[0m"
 				sleep 2
 				menu
 			fi
