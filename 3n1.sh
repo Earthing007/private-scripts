@@ -127,9 +127,14 @@ install_vless (){
 	info
 }
 
-# Install SS with V2ray plugin
+# Install SS with v2ray-plugin
 install_ss (){
 	rm -f ss.sh && curl -o ss.sh 'https://9acd8eb3382190b929d9d1b53dcd92d63658eaea@raw.githubusercontent.com/Earthing007/private-scripts/main/ss-v2ray' && chmod +x ss.sh && ./ss.sh
+}
+
+# Install SS with xray-plugin
+install_ss_xray (){
+	rm -f ss_xray.sh && curl -o ss_xray.sh 'https://9acd8eb3382190b929d9d1b53dcd92d63658eaea@raw.githubusercontent.com/Earthing007/private-scripts/main/ss-xray' && chmod +x ss_xray.sh && ./ss_xray.sh
 }
 
 # Misc
@@ -164,8 +169,9 @@ menu (){
 	echo -e "[1] ${CY}Install Vmess${NC}"
 	echo -e "[2] ${CY}Install Vless${NC}"
 	echo -e "[3] ${CY}Install Shadowsocks${NC}"
-	echo -e "[4] ${CY}Enable Optimizations(experimental)${NC}\n"	
-	read -p "$(echo -e 'Choose from options \e[32m[\e[0m1-4\e[32m]\e[0m: ')" option
+	echo -e "[4] ${CY}Install Shadowsocks xray-plugin${NC}"
+	echo -e "[5] ${CY}Enable Optimizations(experimental)${NC}\n"	
+	read -p "$(echo -e 'Choose from options \e[32m[\e[0m1-5\e[32m]\e[0m: ')" option
 	case $option in
 			1)
 			get_creds
@@ -194,6 +200,10 @@ menu (){
 			install_ss
 			;;
 			4)
+			update
+			install_ss_xray
+			;;			
+			5)
 			misc
 			[[ $(netstat -tulpn | grep "nginx") ]] && systemctl restart v2ray && systemctl restart nginx && echo -e "${GR}Please reboot now to apply changes${NC}"
 			[[ $(netstat -tulpn | grep "ss-server") ]] && systemctl restart shadowsocks && echo -e "${CY}Please reboot now to apply changes${NC}"
