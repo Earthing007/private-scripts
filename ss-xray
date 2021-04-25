@@ -1,0 +1,287 @@
+#!/bin/sh
+# Shadowsocks-libev with xray-plugin installer
+# Copyright (c) 2019 M3chD09
+# Modified by Earthing007
+
+# Check system
+if [ ! -f /etc/lsb-release ];then
+    if ! grep -Eqi "ubuntu|debian" /etc/issue;then
+        echo "\033[1;31mOnly Ubuntu or Debian can run this shell.\033[0m"
+        exit 1
+    fi
+fi
+
+# Make sure only root can run our script
+[ `whoami` != "root" ] && echo "\033[1;31mThis script must be run as root.\033[0m" && exit 1
+
+# Version
+LIBSODIUM_VER=stable
+MBEDTLS_VER=2.16.5
+ss_file=0
+xray_file=0
+get_latest_ver(){
+    ss_file=$(wget -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest | grep name | grep tar | cut -f4 -d\")
+    xray_file=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-amd64 | grep name | cut -f4 -d\")
+}
+
+# Set shadowsocks-libev config password
+set_password(){
+    #echo "\033[1;34mCert Link: \033[0m"
+    #read cert
+    #echo "\033[1;34mKey Link: \033[0m"
+    #read key
+    #echo "\033[1;34mPlease enter password for shadowsocks-libev:\033[0m"
+    #read -p "(Default password: Not0rrentPlease):" shadowsockspwd
+    #[ -z "${shadowsockspwd}" ] && shadowsockspwd="Not0rrentPlease"
+    #echo "\033[1;35mpassword = ${shadowsockspwd}\033[0m"
+    shadowsockspwd=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 12)
+}
+
+# Set domain
+set_domain(){
+    echo "\033[1;34mPlease enter your domain:\033[0m"
+    read domain
+    str=`echo $domain | grep '^\([a-zA-Z0-9_\-]\{1,\}\.\)\{1,\}[a-zA-Z]\{2,5\}'`
+    while [ ! -n "${str}" ]
+    do
+        echo "\033[1;31mInvalid domain.\033[0m"
+        echo "\033[1;31mPlease try again:\033[0m"
+        read domain
+        str=`echo $domain | grep '^\([a-zA-Z0-9_\-]\{1,\}\.\)\{1,\}[a-zA-Z]\{2,5\}'`
+    done
+    echo "\033[1;35mdomain = ${domain}\033[0m"
+}
+
+# Pre-installation
+pre_install(){
+    read -p "Press any key to start the installation." a
+    echo "\033[1;34mStart installing. This may take a while.\033[0m"
+    apt-get update
+    apt-get install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake
+    [[ ! "$(command -v base64)" ]] && apt install -y coreutils
+    apt install -y python-pip zip
+    pip install qrcode
+    pip install pillow
+}
+
+
+# Installation of Libsodium
+install_libsodium(){
+    if [ -f /usr/lib/libsodium.a ] || [ -f /usr/lib64/libsodium.a ];then
+        echo "\033[1;32mLibsodium already installed, skip.\033[0m"
+    else
+        if [ ! -f libsodium-$LIBSODIUM_VER.tar.gz ];then
+            wget https://download.libsodium.org/libsodium/releases/LATEST.tar.gz -O libsodium-$LIBSODIUM_VER.tar.gz
+        fi
+        tar xf libsodium-$LIBSODIUM_VER.tar.gz
+        cd libsodium-$LIBSODIUM_VER
+        ./configure --prefix=/usr && make
+        make install
+        cd ..
+        ldconfig
+        if [ ! -f /usr/lib/libsodium.a ] && [ ! -f /usr/lib64/libsodium.a ];then
+            echo "\033[1;31mFailed to install libsodium.\033[0m"
+            exit 1
+        fi
+    fi
+}
+
+
+# Installation of MbedTLS
+install_mbedtls(){
+    if [ -f /usr/lib/libmbedtls.a ];then
+        echo "\033[1;32mMbedTLS already installed, skip.\033[0m"
+    else
+        if [ ! -f mbedtls-$MBEDTLS_VER-gpl.tgz ];then
+            wget https://tls.mbed.org/download/mbedtls-$MBEDTLS_VER-gpl.tgz
+        fi
+        tar xf mbedtls-$MBEDTLS_VER-gpl.tgz
+        cd mbedtls-$MBEDTLS_VER
+        make SHARED=1 CFLAGS=-fPIC
+        make DESTDIR=/usr install
+        cd ..
+        ldconfig
+        if [ ! -f /usr/lib/libmbedtls.a ];then
+            echo "\033[1;31mFailed to install MbedTLS.\033[0m"
+            exit 1
+        fi
+    fi
+}
+
+
+# Installation of shadowsocks-libev
+install_ss(){
+    if [ -f /usr/local/bin/ss-server ];then
+        echo "\033[1;32mShadowsocks-libev already installed, skip.\033[0m"
+    else
+        if [ ! -f $ss_file ];then
+            ss_url=$(wget -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest | grep browser_download_url | cut -f4 -d\")
+            wget $ss_url
+        fi
+        tar xf $ss_file
+        cd $(echo ${ss_file} | cut -f1-3 -d\.)
+        ./configure && make
+        make install
+        cd ..
+        if [ ! -f /usr/local/bin/ss-server ];then
+            echo "\033[1;31mFailed to install shadowsocks-libev.\033[0m"
+            exit 1
+        fi
+    fi
+}
+
+
+# Installation of xray-plugin
+install_v2(){
+    if [ -f /usr/local/bin/xray-plugin ];then
+        echo "\033[1;32mxray-plugin already installed, skip.\033[0m"
+    else
+        if [ ! -f $xray_file ];then
+            xray_url=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-amd64 | grep browser_download_url | cut -f4 -d\")
+            wget $xray_url
+        fi
+        tar xf $xray_file
+        mv x2ray-plugin_linux_amd64 /usr/local/bin/xray-plugin
+        if [ ! -f /usr/local/bin/xray-plugin ];then
+            echo "\033[1;31mFailed to install xray-plugin.\033[0m"
+            exit 1
+        fi
+    fi
+}
+
+# Configure
+ss_conf(){
+    mkdir /etc/shadowsocks-libev
+    cat >/etc/shadowsocks-libev/config.json << EOF
+{
+    "server":"0.0.0.0",
+    "server_port":443,
+    "password":"$shadowsockspwd",
+    "timeout":300,
+    "user":"nobody",
+    "method":"aes-256-gcm",
+    "nameserver": "1.1.1.1",
+    "fast_open":true,
+    "no_delay":true,
+    "plugin":"xray-plugin",
+    "plugin_opts":"server;tls;cert=/usr/local/etc/xray/fullchain.pem;key=/usr/local/etc/xray/key.pem;host=$domain;loglevel=none"
+}
+EOF
+    cat >/lib/systemd/system/shadowsocks.service << EOF
+[Unit]
+Description=Shadowsocks-libev Server Service
+After=network.target
+[Service]
+ExecStart=/usr/local/bin/ss-server -c /etc/shadowsocks-libev/config.json
+ExecReload=/bin/kill -HUP \$MAINPID
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
+get_cert(){
+	mkdir /usr/local/etc/xray/
+	#wget -O /usr/local/etc/xray/cert.pem "$cert"
+	#wget -O /usr/local/etc/xray/key.pem "$key"
+	wget -O /usr/local/etc/xray/cert.pem "https://www.dropbox.com/s/lzzmafwolc6zh2r/phclngsakalam-cert.pem?dl=0"
+	wget -O /usr/local/etc/xray/key.pem "https://www.dropbox.com/s/7jsc6tnwl247itq/phclngsakalam-key.pem?dl=0"	
+	curl -kL "https://support.cloudflare.com/hc/article_attachments/360037898732/origin_ca_ecc_root.pem" -o /usr/local/etc/xray/root_ecc.pem
+	xraydir='/usr/local/etc/xray' && printf "%b\n" "$(cat $xraydir/cert.pem)\n$(cat $xraydir/cert.pem)\n$(cat $xraydir/root_ecc.pem)" > $xraydir/fullchain.pem
+}
+
+start_ss(){
+    systemctl status shadowsocks > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        systemctl stop shadowsocks
+    fi
+    systemctl enable shadowsocks
+    systemctl start shadowsocks
+}
+
+remove_files(){
+    rm -f libsodium-$LIBSODIUM_VER.tar.gz mbedtls-$MBEDTLS_VER-gpl.tgz $ss_file $xray_file
+    rm -rf libsodium-$LIBSODIUM_VER mbedtls-$MBEDTLS_VER $(echo ${ss_file} | cut -f1-3 -d\.)
+}
+
+print_ss_info(){
+    clear
+    DATE=$(date --rfc-3339=date)
+    LOC=$(curl -sk ipinfo.io/region)
+    export PYTHONIOENCODING=utf-8
+    echo "\n"
+    echo "\033[1;32mAccount details:\033[0m"
+    echo "\n"
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM >> URI.txt
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS >> URI.txt    
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO >> URI.txt
+    echo "GTM"
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM | qr
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM | qr > ${LOC}_${DATE}_GTM.png 
+    echo "STS"
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS | qr
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS | qr > ${LOC}_${DATE}_STS.png
+    echo "GOMO"
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO | qr
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO | qr > ${LOC}_${DATE}_GOMO.png 
+    echo "\n"
+    cat URI.txt
+    echo "\n"
+    zip shadowsocks_${LOC}_${DATE}.zip *.png
+}
+
+install_all(){
+    set_password
+    set_domain
+    pre_install
+    install_libsodium
+    install_mbedtls
+    get_latest_ver
+    install_ss
+    install_v2
+    ss_conf
+    get_cert
+    start_ss
+    remove_files
+    print_ss_info
+}
+
+remove_all(){
+    systemctl disable shadowsocks
+    systemctl stop shadowsocks
+    rm -fr /etc/shadowsocks-libev
+    rm -f /usr/local/bin/ss-local
+    rm -f /usr/local/bin/ss-tunnel
+    rm -f /usr/local/bin/ss-server
+    rm -f /usr/local/bin/ss-manager
+    rm -f /usr/local/bin/ss-redir
+    rm -f /usr/local/bin/ss-nat
+    rm -f /usr/local/bin/xray-plugin
+    rm -f /usr/local/lib/libshadowsocks-libev.a
+    rm -f /usr/local/lib/libshadowsocks-libev.la
+    rm -f /usr/local/include/shadowsocks.h
+    rm -f /usr/local/lib/pkgconfig/shadowsocks-libev.pc
+    rm -f /usr/local/share/man/man1/ss-local.1
+    rm -f /usr/local/share/man/man1/ss-tunnel.1
+    rm -f /usr/local/share/man/man1/ss-server.1
+    rm -f /usr/local/share/man/man1/ss-manager.1
+    rm -f /usr/local/share/man/man1/ss-redir.1
+    rm -f /usr/local/share/man/man1/ss-nat.1
+    rm -f /usr/local/share/man/man8/shadowsocks-libev.8
+    rm -fr /usr/local/share/doc/shadowsocks-libev
+    rm -f /usr/lib/systemd/system/shadowsocks.service
+	rm -frd /usr/local/etc/xray/
+    echo "\033[1;32mRemove success!\033[0m"
+}
+
+clear
+echo "What do you want to do?"
+echo "[1] Install"
+echo "[2] Remove"
+read -p "(Default option: Install):" option
+option=${option:-1}
+if [ $option -eq 2 ];then
+    remove_all
+else
+    install_all
+fi
