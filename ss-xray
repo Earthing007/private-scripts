@@ -141,7 +141,7 @@ install_v2(){
             wget $xray_url
         fi
         tar xf $xray_file
-        mv x2ray-plugin_linux_amd64 /usr/local/bin/xray-plugin
+        mv xray-plugin_linux_amd64 /usr/local/bin/xray-plugin
         if [ ! -f /usr/local/bin/xray-plugin ];then
             echo "\033[1;31mFailed to install xray-plugin.\033[0m"
             exit 1
