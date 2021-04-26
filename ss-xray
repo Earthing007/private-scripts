@@ -21,7 +21,12 @@ ss_file=0
 xray_file=0
 get_latest_ver(){
     ss_file=$(wget -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest | grep name | grep tar | cut -f4 -d\")
-    xray_file=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-amd64 | grep name | cut -f4 -d\")
+	arch=$(dpkg --print-architecture)
+	if [[ "$arch" = amd64 ]]; then
+		xray_file=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-amd64 | grep name | cut -f4 -d\")
+	elif [[ "$arch" = arm64 ]]; then
+		xray_file=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-arm64 | grep name | cut -f4 -d\")
+	fi
 }
 
 # Set shadowsocks-libev config password
@@ -137,11 +142,20 @@ install_xray(){
         echo "\033[1;32mxray-plugin already installed, skip.\033[0m"
     else
         if [ ! -f $xray_file ];then
-            xray_url=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-amd64 | grep browser_download_url | cut -f4 -d\")
-            wget $xray_url
+			if [[ "$arch" = amd64 ]]; then
+				xray_url=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-amd64 | grep browser_download_url | cut -f4 -d\")
+            elif [[ "$arch" = arm64 ]]; then
+				xray_url=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-arm64 | grep browser_download_url | cut -f4 -d\")
+			else
+				echo "\033[1;31mCPU Architecture not supported, exiting..\033[0m"
+				sleep 2
+				exit 1
+			fi
+			wget $xray_url
         fi
         tar xf $xray_file
-        mv xray-plugin_linux_amd64 /usr/local/bin/xray-plugin
+        [[ "$arch" = amd64 ]] && mv xray-plugin_linux_amd64 /usr/local/bin/xray-plugin
+		[[ "$arch" = arm64 ]] && mv xray-plugin_linux_amd64 /usr/local/bin/xray-plugin
         if [ ! -f /usr/local/bin/xray-plugin ];then
             echo "\033[1;31mFailed to install xray-plugin.\033[0m"
             exit 1
