@@ -132,7 +132,7 @@ install_ss(){
 
 
 # Installation of xray-plugin
-install_v2(){
+install_xray(){
     if [ -f /usr/local/bin/xray-plugin ];then
         echo "\033[1;32mxray-plugin already installed, skip.\033[0m"
     else
@@ -238,7 +238,7 @@ install_all(){
     install_mbedtls
     get_latest_ver
     install_ss
-    install_v2
+    install_xray
     ss_conf
     get_cert
     start_ss
