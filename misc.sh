@@ -316,6 +316,7 @@ systemctl start rc-local
 sleep 0.5
 
 if [ -s /etc/rc.local ]; then
+	CPU=$(nproc --all)
 	if [[ $(netstat -tulpn | grep "nginx") ]] && [[ $(netstat -tulpn | grep "xray-plugin") ]]; then
 		sed -i '$ i\cpulimit -e "nginx" -l $((20*$CPU)) -b' /etc/rc.local
 		sed -i '$ i\cpulimit -e "xray" -l $((20*$CPU)) -b' /etc/rc.local
