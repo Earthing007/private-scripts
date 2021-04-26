@@ -64,10 +64,6 @@ pre_install(){
     apt-get update
     apt-get install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake
     [ ! "$(command -v base64)" ] && apt install -y coreutils
-    apt install -y python3-pip
-    python3 -m pip install --upgrade pip
-    python3 -m pip install --upgrade QRCode
-    python3 -m pip install --upgrade Pillow
 }
 
 
