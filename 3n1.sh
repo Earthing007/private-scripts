@@ -150,10 +150,12 @@ misc (){
 update (){
 	export DEBIAN_FRONTEND=noninteractive
 	apt update && apt upgrade -y -f
-	apt install curl wget zip unzip net-tools lsof python-pip zip -y
+	apt install curl wget zip unzip net-tools lsof zip -y
 	[[ ! "$(command -v base64)" ]] && apt install -y coreutils
-	pip install qrcode
-	pip install pillow
+	apt install -y python3-pip
+	python3 -m pip install --upgrade pip
+	python3 -m pip install --upgrade QRCode
+	python3 -m pip install --upgrade Pillow
 	# Setting timezone to GMT+8 PHST
 	timedatectl set-timezone Asia/Manila
 }
