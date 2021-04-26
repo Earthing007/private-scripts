@@ -319,16 +319,16 @@ if [ -s /etc/rc.local ]; then
 	CPU=$(nproc --all)
 	if [[ $(netstat -tulpn | grep "nginx") ]] && [[ $(netstat -tulpn | grep "xray-plugin") ]]; then
 		sed -i '$ i\cpulimit -e "nginx" -l $((20*$CPU)) -b' /etc/rc.local
-		sed -i '$ i\cpulimit -e "xray" -l $((20*$CPU)) -b' /etc/rc.local
-	elif [[ $(netstat -tulpn | grep "nginx") ]] && [[ $(netstat -tulpn | grep "v2ray-plugin") ]]; then
+		sed -i '$ i\cpulimit -e "xray-plugin" -l $((20*$CPU)) -b' /etc/rc.local
+	elif [[ $(netstat -tulpn | grep "nginx") ]] && [[ $(netstat -tulpn | grep "v2ray") ]]; then
 		sed -i '$ i\cpulimit -e "nginx" -l $((20*$CPU)) -b' /etc/rc.local
 		sed -i '$ i\cpulimit -e "v2ray" -l $((20*$CPU)) -b' /etc/rc.local
 	elif [[ $(netstat -tulpn | grep "ss-server") ]] && [[ $(netstat -tulpn | grep "xray-plugin") ]]; then
 		sed -i '$ i\cpulimit -e "ss-server" -l $((20*$CPU)) -b' /etc/rc.local
-		sed -i '$ i\cpulimit -e "xray" -l $((20*$CPU)) -b' /etc/rc.local
+		sed -i '$ i\cpulimit -e "xray-plugin" -l $((20*$CPU)) -b' /etc/rc.local
 	elif [[ $(netstat -tulpn | grep "ss-server") ]] && [[ $(netstat -tulpn | grep "v2ray-plugin") ]]; then
 		sed -i '$ i\cpulimit -e "ss-server" -l $((20*$CPU)) -b' /etc/rc.local
-		sed -i '$ i\cpulimit -e "v2ray" -l $((20*$CPU)) -b' /etc/rc.local
+		sed -i '$ i\cpulimit -e "v2ray-plugin" -l $((20*$CPU)) -b' /etc/rc.local
 	fi
 fi
 
