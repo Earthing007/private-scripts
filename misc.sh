@@ -273,6 +273,59 @@ if [[ $(free -m | grep -i 'mem' | awk '{print $2}') -lt 600 ]]; then
 	systemctl disable fail2ban && systemctl stop fail2ban
 fi
 
+if [[ $(free -m | grep -i 'mem' | awk '{print $2}') -lt 600 ]]; then
+	
+	# Adding rc.local
+
+	cat <<'eof' > /etc/systemd/system/rc-local.service
+[Unit]
+Description=/etc/rc.local
+ConditionPathExists=/etc/rc.local
+ 
+[Service]
+Type=forking
+ExecStart=/etc/rc.local start
+TimeoutSec=0
+StandardOutput=tty
+RemainAfterExit=yes
+SysVStartPriority=99
+ 
+[Install]
+WantedBy=multi-user.target
+	eof
+	
+	cat <<'eof' > /etc/rc.local
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+exit 0
+	eof
+	
+	chmod +x /etc/rc.local
+	systemctl start rc-local
+	sleep 0.5
+
+	if [[ $(netstat -tulpn | grep "nginx") ]] && [[ $(netstat -tulpn | grep "xray-plugin") ]]; then
+		sed -i '$ i\cpulimit -e "nginx" -l $((20*$CPU)) -b' /etc/rc.local
+		sed -i '$ i\cpulimit -e "xray" -l $((20*$CPU)) -b' /etc/rc.local
+	elif [[ $(netstat -tulpn | grep "nginx") ]] && [[ $(netstat -tulpn | grep "v2ray-plugin") ]]; then
+		sed -i '$ i\cpulimit -e "nginx" -l $((20*$CPU)) -b' /etc/rc.local
+		sed -i '$ i\cpulimit -e "v2ray" -l $((20*$CPU)) -b' /etc/rc.local
+	elif [[ $(netstat -tulpn | grep "ss-server") ]]
+		sed -i '$ i\cpulimit -e "ss-server" -l $((20*$CPU)) -b' /etc/rc.local
+	fi
+fi
+
 mkdir /etc/exert
 curl -kL "https://gist.githubusercontent.com/Earthing007/af7f138077e0a7e67d96b3e3f5797d42/raw/clear_cache.sh" -o /etc/exert/clear_cache.sh && chmod +x /etc/exert/clear_cache.sh
 
