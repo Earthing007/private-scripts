@@ -21,7 +21,7 @@ ss_file=0
 xray_file=0
 get_latest_ver(){
     ss_file=$(wget -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest | grep name | grep tar | cut -f4 -d\")
-	arch=$(dpkg --print-architecture)
+    arch=$(dpkg --print-architecture)
 	if [[ "$arch" = amd64 ]]; then
 		xray_file=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-amd64 | grep name | cut -f4 -d\")
 	elif [[ "$arch" = arm64 ]]; then
