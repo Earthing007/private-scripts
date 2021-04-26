@@ -22,9 +22,9 @@ xray_file=0
 get_latest_ver(){
     ss_file=$(wget -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest | grep name | grep tar | cut -f4 -d\")
     arch=$(dpkg --print-architecture)
-	if [[ "$arch" = amd64 ]]; then
+	if [ "$arch" = amd64 ]; then
 		xray_file=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-amd64 | grep name | cut -f4 -d\")
-	elif [[ "$arch" = arm64 ]]; then
+	elif [ "$arch" = arm64 ]; then
 		xray_file=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-arm64 | grep name | cut -f4 -d\")
 	fi
 }
@@ -63,10 +63,11 @@ pre_install(){
     echo "\033[1;34mStart installing. This may take a while.\033[0m"
     apt-get update
     apt-get install -y --no-install-recommends gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake
-    [[ ! "$(command -v base64)" ]] && apt install -y coreutils
-    apt install -y python-pip zip
-    pip install qrcode
-    pip install pillow
+    [ ! "$(command -v base64)" ] && apt install -y coreutils
+    apt install -y python3-pip
+    python3 -m pip install --upgrade pip
+    python3 -m pip install --upgrade QRCode
+    python3 -m pip install --upgrade Pillow
 }
 
 
@@ -142,9 +143,9 @@ install_xray(){
         echo "\033[1;32mxray-plugin already installed, skip.\033[0m"
     else
         if [ ! -f $xray_file ];then
-			if [[ "$arch" = amd64 ]]; then
+			if [ "$arch" = amd64 ]; then
 				xray_url=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-amd64 | grep browser_download_url | cut -f4 -d\")
-            elif [[ "$arch" = arm64 ]]; then
+			elif [ "$arch" = arm64 ]; then
 				xray_url=$(wget -qO- https://api.github.com/repos/teddysun/xray-plugin/releases/latest | grep linux-arm64 | grep browser_download_url | cut -f4 -d\")
 			else
 				echo "\033[1;31mCPU Architecture not supported, exiting..\033[0m"
@@ -154,8 +155,8 @@ install_xray(){
 			wget $xray_url
         fi
         tar xf $xray_file
-        [[ "$arch" = amd64 ]] && mv xray-plugin_linux_amd64 /usr/local/bin/xray-plugin
-		[[ "$arch" = arm64 ]] && mv xray-plugin_linux_amd64 /usr/local/bin/xray-plugin
+        [ "$arch" = amd64 ] && mv xray-plugin_linux_amd64 /usr/local/bin/xray-plugin
+		[ "$arch" = arm64 ] && mv xray-plugin_linux_arm64 /usr/local/bin/xray-plugin
         if [ ! -f /usr/local/bin/xray-plugin ];then
             echo "\033[1;31mFailed to install xray-plugin.\033[0m"
             exit 1
@@ -227,8 +228,10 @@ print_ss_info(){
     echo "\033[1;32mAccount details:\033[0m"
     echo "\n"
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM >> URI.txt
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS >> URI.txt    
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS >> URI.txt
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO >> URI.txt
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS >> STS_URI.txt
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO >> GOMO_URI.txt
     echo "GTM"
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM | qr
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM | qr > ${LOC}_${DATE}_GTM.png 
@@ -241,7 +244,9 @@ print_ss_info(){
     echo "\n"
     cat URI.txt
     echo "\n"
-    zip shadowsocks_${LOC}_${DATE}.zip *.png
+    zip shadowsocks_${LOC}_${DATE}.zip *.png URI.txt
+    zip shadowsocks_GOMO_${LOC}_${DATE}.zip *GOMO.png GOMO_URI.txt
+    zip shadowsocks_STS_${LOC}_${DATE}.zip *STS.png STS_URI.txt
 }
 
 install_all(){
