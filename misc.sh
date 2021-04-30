@@ -43,6 +43,9 @@ cat >> /etc/iptables/rules.v4 << END
 # Allows SSH, HTTP and HTTPS connections from anywhere 
 -A INPUT -i $NIC -p tcp -m state --state NEW,ESTABLISHED --dport 22 -j ACCEPT
 -A INPUT -i $NIC -p tcp --dport 80 -j ACCEPT
+-A INPUT -i $NIC -p tcp --dport 81 -j ACCEPT
+-A INPUT -i $NIC -p tcp --dport 85 -j ACCEPT
+-A INPUT -i $NIC -p tcp --dport 88 -j ACCEPT
 -A INPUT -i $NIC -p tcp --dport 443 -j ACCEPT
 -A INPUT -i $NIC -p udp -m state --state ESTABLISHED --sport 53 -j ACCEPT
 -A INPUT -i $NIC -p udp -m state --state NEW,ESTABLISHED --dport 53 -j ACCEPT
@@ -186,7 +189,7 @@ apt-get install speedtest
 # BBR
 kernel=$(uname -r | awk -F- '{print $1}' | tr -d '.')
 checkBBR () {
-	if [[ $(sysctl net.ipv4.tcp_congestion_control | awk -F= '{print $2}') = " bbr" ]]; then
+	if [[ $(sysctl net.ipv4.tcp_congestion_control | awk '{print $3}') = "bbr" ]]; then
 		return 0
 	else
 		return 1
@@ -231,7 +234,7 @@ net.core.wmem_max = 67108864
 net.ipv4.tcp_mem = 25600 51200 102400
 net.ipv4.tcp_rmem = 4096 87380 67108864
 net.ipv4.tcp_wmem = 4096 65536 67108864" >> /etc/sysctl.conf
-sysctl -p
+sysctl -p &> /dev/null
 else
 echo "fs.file-max = 51200
 net.core.netdev_max_backlog = 250000
@@ -252,7 +255,7 @@ net.core.wmem_max = 67108864
 net.ipv4.tcp_mem = 25600 51200 102400
 net.ipv4.tcp_rmem = 4096 87380 67108864
 net.ipv4.tcp_wmem = 4096 65536 67108864" >> /etc/sysctl.conf
-sysctl -p
+sysctl -p &> /dev/null
 fi
 
 if [[ $(ulimit -aH | grep "open files" | awk '{print $4}') -lt 51200 ]]; then
@@ -271,65 +274,6 @@ timedatectl set-timezone Asia/Manila
 
 if [[ $(free -m | grep -i 'mem' | awk '{print $2}') -lt 600 ]]; then
 	systemctl disable fail2ban && systemctl stop fail2ban
-fi
-
-
-if [[ $(free -m | grep -i 'mem' | awk '{print $2}') -lt 600 ]]; then
-# Adding rc.local
-cat <<'eof' > /etc/systemd/system/rc-local.service
-[Unit]
-Description=/etc/rc.local
-ConditionPathExists=/etc/rc.local
-
-[Service]
-Type=forking
-ExecStart=/etc/rc.local start
-TimeoutSec=0
-StandardOutput=tty
-RemainAfterExit=yes
-SysVStartPriority=99
-
-[Install]
-WantedBy=multi-user.target
-eof
-
-cat <<'eof' > /etc/rc.local
-#!/bin/sh -e
-#
-# rc.local
-#
-# This script is executed at the end of each multiuser runlevel.
-# Make sure that the script will "exit 0" on success or any other
-# value on error.
-#
-# In order to enable or disable this script just change the execution
-# bits.
-#
-# By default this script does nothing.
-
-exit 0
-eof
-fi
-
-chmod +x /etc/rc.local
-systemctl start rc-local
-sleep 0.5
-
-if [ -s /etc/rc.local ]; then
-	CPU=$(nproc --all)
-	if [[ $(netstat -tulpn | grep "nginx") ]] && [[ $(netstat -tulpn | grep "xray-plugin") ]]; then
-		sed -i '$ i\cpulimit -e "nginx" -l $((20*$CPU)) -b' /etc/rc.local
-		sed -i '$ i\cpulimit -e "xray-plugin" -l $((20*$CPU)) -b' /etc/rc.local
-	elif [[ $(netstat -tulpn | grep "nginx") ]] && [[ $(netstat -tulpn | grep "v2ray") ]]; then
-		sed -i '$ i\cpulimit -e "nginx" -l $((20*$CPU)) -b' /etc/rc.local
-		sed -i '$ i\cpulimit -e "v2ray" -l $((20*$CPU)) -b' /etc/rc.local
-	elif [[ $(netstat -tulpn | grep "ss-server") ]] && [[ $(netstat -tulpn | grep "xray-plugin") ]]; then
-		sed -i '$ i\cpulimit -e "ss-server" -l $((20*$CPU)) -b' /etc/rc.local
-		sed -i '$ i\cpulimit -e "xray-plugin" -l $((20*$CPU)) -b' /etc/rc.local
-	elif [[ $(netstat -tulpn | grep "ss-server") ]] && [[ $(netstat -tulpn | grep "v2ray-plugin") ]]; then
-		sed -i '$ i\cpulimit -e "ss-server" -l $((20*$CPU)) -b' /etc/rc.local
-		sed -i '$ i\cpulimit -e "v2ray-plugin" -l $((20*$CPU)) -b' /etc/rc.local
-	fi
 fi
 
 mkdir /etc/exert
