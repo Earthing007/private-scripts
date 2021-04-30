@@ -152,7 +152,7 @@ install_xray(){
         fi
         tar xf $xray_file
         [ "$arch" = amd64 ] && mv xray-plugin_linux_amd64 /usr/local/bin/xray-plugin
-		[ "$arch" = arm64 ] && mv xray-plugin_linux_arm64 /usr/local/bin/xray-plugin
+	[ "$arch" = arm64 ] && mv xray-plugin_linux_arm64 /usr/local/bin/xray-plugin
         if [ ! -f /usr/local/bin/xray-plugin ];then
             echo "\033[1;31mFailed to install xray-plugin.\033[0m"
             exit 1
@@ -191,6 +191,61 @@ WantedBy=multi-user.target
 EOF
 }
 
+# Configure apache2
+apache2 (){
+	sleep 0.5
+	systemctl stop nginx
+	sleep 0.5
+	apt install apache2 -y
+	sed -i "s/Listen 80/Listen 85/" /etc/apache2/ports.conf
+	sed -i "s/<VirtualHost *:80>/<VirtualHost *:85>/" /etc/apache2/sites-enabled/000-default.conf
+	systemctl restart apache2
+	
+	# Create dir
+	rm -rf /var/www/ssxray
+	mkdir -p /var/www/ssxray
+	# Change permission
+	chown -R www-data:www-data /var/www/ssxray
+	chmod -R g+rw /var/www/ssxray
+
+	# Config to allow dir
+	cat <<'EOF'> /etc/apache2/conf-available/ssxray-configs.conf
+<Directory "/var/www/ssxray">
+Options Indexes FollowSymLinks
+AllowOverride all
+Require all granted
+</Directory>
+EOF
+
+	# Allow conf then restart
+	a2enconf ssxray-configs
+	systemctl restart apache2
+
+	# Create site config
+	cat <<'EOF'> /etc/apache2/sites-available/ssxray-configs.conf
+<VirtualHost *:81>
+ServerAdmin support@exertvpn.co
+ServerName localhost
+DirectoryIndex index.html index.txt
+DocumentRoot /var/www/ssxray
+</VirtualHost>
+EOF
+
+	sed -i '/Listen 85/aListen 81' /etc/apache2/ports.conf
+
+	# Allow conf then reload
+	a2ensite ssxray-configs
+	systemctl reload apache2
+
+	# Create .htaccess
+	echo 'AddType application/json .json' > /var/www/ssxray/.htaccess
+	echo 'AddType application/zip .zip' >> /var/www/ssxray/.htaccess
+	# Add index.html
+	echo '' > /var/www/ssxray/index.html
+	# Copy files to dir
+	#cp -R ~/*.zip /var/www/ssxray
+}
+
 get_cert(){
 	mkdir /usr/local/etc/xray/
 	#wget -O /usr/local/etc/xray/cert.pem "$cert"
@@ -219,15 +274,17 @@ print_ss_info(){
     clear
     DATE=$(date --rfc-3339=date)
     LOC=$(curl -sk ipinfo.io/region)
+    IP=$(curl -sk ipinfo.io/ip)
+    FILE=$(ls /var/www/ssxray/ | egrep '*zip')
     export PYTHONIOENCODING=utf-8
     echo "\n"
     echo "\033[1;32mAccount details:\033[0m"
     echo "\n"
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM >> URI.txt
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS >> URI.txt
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO >> URI.txt
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS >> STS_URI.txt
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO >> GOMO_URI.txt
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM >> ssxray_url.txt
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS >> ssxray_url.txt
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO >> ssxray_url.txt
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS > ${LOC}_${DATE}_STS_ssxray_url.txt
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO > ${LOC}_${DATE}_GOMO_ssxray_url.txt
     echo "GTM"
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM | qr
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.17.64.3:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GTM | qr > ${LOC}_${DATE}_GTM.png 
@@ -236,13 +293,12 @@ print_ss_info(){
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@45.60.158.66:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_STS | qr > ${LOC}_${DATE}_STS.png
     echo "GOMO"
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO | qr
-    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO | qr > ${LOC}_${DATE}_GOMO.png 
+    echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO | qr > ${LOC}_${DATE}_GOMO.png
+    zip shadowsocks_${LOC}_${DATE}.zip *.png *ssxray_url.txt
+    # Copy configs to apache2 dir ready for download
+    cp -R ~/*.zip /var/www/ssxray
     echo "\n"
-    cat URI.txt
-    echo "\n"
-    zip shadowsocks_${LOC}_${DATE}.zip *.png URI.txt
-    zip shadowsocks_GOMO_${LOC}_${DATE}.zip *GOMO.png GOMO_URI.txt
-    zip shadowsocks_STS_${LOC}_${DATE}.zip *STS.png STS_URI.txt
+    echo "\033[1;32mDownload your configs here --> \033[1;32mhttp://${IP}:81/${FILE}\033[0m\n"
 }
 
 install_all(){
@@ -255,6 +311,7 @@ install_all(){
     install_ss
     install_xray
     ss_conf
+    apache2
     get_cert
     start_ss
     remove_files
