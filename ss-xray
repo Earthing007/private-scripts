@@ -275,7 +275,6 @@ print_ss_info(){
     DATE=$(date --rfc-3339=date)
     LOC=$(curl -sk ipinfo.io/region)
     IP=$(curl -sk ipinfo.io/ip)
-    FILE=$(ls /var/www/ssxray/ | egrep '*zip')
     export PYTHONIOENCODING=utf-8
     echo "\n"
     echo "\033[1;32mAccount details:\033[0m"
@@ -294,11 +293,12 @@ print_ss_info(){
     echo "GOMO"
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO | qr
     echo "ss://"`echo -n "aes-256-gcm:$shadowsockspwd" | base64 | tr '/+' '_-' | tr -d '='`@104.18.4.38:443?plugin=xray-plugin%3Bhost%3D${domain}%3Btls#exertconf_${LOC}_${DATE}_GOMO | qr > ${LOC}_${DATE}_GOMO.png
-    zip shadowsocks_${LOC}_${DATE}.zip *.png *ssxray_url.txt
+    zip ssxray_${LOC}_${DATE}.zip *.png *ssxray_url.txt
     # Copy configs to apache2 dir ready for download
     cp -R ~/*.zip /var/www/ssxray
     echo "\n"
-    echo "\033[1;32mDownload your configs here --> \033[1;32mhttp://${IP}:81/${FILE}\033[0m\n"
+    FILE=$(ls /var/www/ssxray/ | egrep '*zip')
+    echo "\033[1;32mDownload your configs here --> \033[1;33mhttp://${IP}:81/${FILE}\033[0m\n"
 }
 
 install_all(){
