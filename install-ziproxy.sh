@@ -9,28 +9,27 @@ update (){
 	# compile and build libjasper
 	latest_version=$(wget -qO- 'https://api.github.com/repos/jasper-software/jasper/releases/latest' | grep 'name' | grep 'version' | awk '{print $2}' | sort -u | tr -d '",')
 	download_url=$(wget -qO- 'https://api.github.com/repos/jasper-software/jasper/releases/latest' | grep 'browser_download_url' | awk '{print $2}' | tr -d '"')
-	wget -O jasper-${latest_version}.tar.gz '$download_url'
-	tar xf jasper-${latest_version}.tar.gz
-	cd jasper-${latest_version} && mkdir build
-	SOURCE_DIR=~/jasper-${latest_version}
+	wget -O jasper-${latest_version}.tar.gz $download_url
+	tar xf jasper-${latest_version}.tar.gz && rm -f jasper-${latest_version}.tar.gz
+	jasper_dir=$(ls | grep -v 'tar' | grep 'jasper-')
+	cd $jasper_dir && mkdir build
+	SOURCE_DIR=~/$jasper_dir
 	INSTALL_DIR=/usr
-	BUILD_DIR=~/jasper-${latest_version}/build
+	BUILD_DIR=~/$jasper_dir/build
 	OPTIONS=
 	cmake -G "Unix Makefiles" -H$SOURCE_DIR -B$BUILD_DIR -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR $OPTIONS
 	cd $BUILD_DIR
 	make clean all
-	# make test
-	# make test ARGS="-V"
 	make install
 }
 
 install_ziproxy (){
 	sleep 1
 	echo -e "\033[0;33m[Info]\033[0m Installing ziproxy.."
-	rm -f ziproxy* && wget -q --trust-server-names 'https://sourceforge.net/projects/ziproxy/files/latest/download'
-	ziproxy_tar=$(ls | grep 'ziproxy' | grep 'tar')
-	ziproxy_dir=$(ls | grep 'ziproxy' | grep -v 'tar')
-	tar xf $ziproxy_tar && rm -f $ziproxy_tar
+	wget -O ziproxy-3.3.2.tar.bz2 'https://downloads.sourceforge.net/project/ziproxy/ziproxy/ziproxy-3.3.2/ziproxy-3.3.2.tar.bz2?ts=gAAAAABgjuuh2E7avpqTILIDHaLB_yDm0Lvb6I86s6vtVeg6XtP8h5TABY2eorI_H7kLOD0MnebJ7r78kKJyojABud0Elmm36g%3D%3D&r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fziproxy%2Ffiles%2Flatest%2Fdownload'
+	sleep 3
+	tar xf ziproxy-3.3.2.tar.bz2
+	ziproxy_dir=$(ls | grep -v 'tar' | grep 'ziproxy-')
 	pushd $ziproxy_dir
 	./configure --with-jasper --with-sasl2=no
 	make
@@ -43,8 +42,11 @@ configure (){
 	echo -e "\033[0;33m[Info]\033[0m Creating ziproxy config file.."
 	mkdir /etc/ziproxy
 	cat <<'EOF' > /etc/ziproxy/ziproxy.conf
+# © ExertVPN
+# Ziproxyconf
+
 Port = 8084
-Nameservers = { "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4" }
+Nameservers = { "1.1.1.1", "1.0.0.1" }
 RedefineUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
 UseContentLength = false
 ProcessHTML = true
@@ -102,12 +104,18 @@ print_info (){
 	echo -e "\n"
 }
 
+clean (){
+	rm -f install-ziproxy.sh
+	rm -rf jasper-2.0.32
+}
+
 install (){
 	update
 	install_ziproxy
 	configure
 	start_service
 	print_info
+	clean
 }
 
 remove (){
@@ -118,6 +126,7 @@ remove (){
 	rm -rf /etc/ziproxy
 	rm -f /usr/local/bin/ziproxy
 	rm -rf ~/ziproxy*
+	rm -r ~/jasper*
 	echo -e "\033[0;33m[Info]\033[0m Ziproxy removed, done."
 }
 
