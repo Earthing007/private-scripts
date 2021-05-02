@@ -43,9 +43,6 @@ configure (){
 	echo -e "\033[0;33m[Info]\033[0m Creating ziproxy config file.."
 	mkdir /etc/ziproxy
 	cat <<'EOF' > /etc/ziproxy/ziproxy.conf
-# © ExertVPN
-# Ziproxyconf
-
 Port = 8084
 Nameservers = { "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4" }
 RedefineUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
