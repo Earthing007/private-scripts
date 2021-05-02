@@ -26,9 +26,8 @@ update (){
 install_ziproxy (){
 	sleep 1
 	echo -e "\033[0;33m[Info]\033[0m Installing ziproxy.."
-	wget -O ziproxy-3.3.2.tar.bz2 'https://downloads.sourceforge.net/project/ziproxy/ziproxy/ziproxy-3.3.2/ziproxy-3.3.2.tar.bz2?ts=gAAAAABgjuuh2E7avpqTILIDHaLB_yDm0Lvb6I86s6vtVeg6XtP8h5TABY2eorI_H7kLOD0MnebJ7r78kKJyojABud0Elmm36g%3D%3D&r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fziproxy%2Ffiles%2Flatest%2Fdownload'
-	sleep 3
-	tar xf ziproxy-3.3.2.tar.bz2
+	wget -qO ziproxy-latest.tar.bz2 'https://sourceforge.net/projects/ziproxy/files/latest/download'
+	tar xf ziproxy-latest.tar.bz2
 	ziproxy_dir=$(ls | grep -v 'tar' | grep 'ziproxy-')
 	pushd $ziproxy_dir
 	./configure --with-jasper --with-sasl2=no
