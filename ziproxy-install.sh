@@ -3,6 +3,7 @@
 # update and install dependencies
 update (){
 	export DEBIAN_FRONTEND=noninteractive
+	apt update
 	apt autoremove --fix-missing -y -f
 	apt upgrade -y
 	apt install -y build-essential cmake libgif-dev libpng-dev libjpeg-dev zlib1g-dev net-tools
