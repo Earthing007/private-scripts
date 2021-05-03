@@ -148,10 +148,20 @@ menu (){
 		esac
 }
 
+check_system (){
+	os=$(grep "^ID=" /etc/os* | awk -F '=' '{print $2}')
+	if [[ $os != ubuntu ]] || [[ $os != debian ]]; then
+		echo -e "\033[1;31m[Error]\033[0m Please run on Ubuntu or Debian only."
+		exit 1
+	else
+		menu
+	fi
+}
+
 # Verify root
 if [[ $(whoami) != 'root' ]]; then
 	echo -e "\033[1;31m[Error]\033[0m You must be logged-in as root before running this script."
 	exit 1
 else
-	menu
+	check_system
 fi
