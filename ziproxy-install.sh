@@ -123,7 +123,6 @@ remove (){
 	rm -rf /etc/ziproxy
 	rm -f /usr/local/bin/ziproxy
 	rm -rf ~/ziproxy*
-	rm -r ~/jasper*
 	echo -e "\033[0;33m[Info]\033[0m Ziproxy removed, done."
 }
 
