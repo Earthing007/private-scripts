@@ -103,7 +103,7 @@ print_info (){
 
 clean (){
 	rm -f install-ziproxy.sh
-	rm -rf jasper-2.0.32
+	rm -r ~/jasper*
 }
 
 install (){
