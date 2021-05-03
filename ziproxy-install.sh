@@ -43,6 +43,8 @@ configure (){
 	mkdir /etc/ziproxy
 	cat <<'EOF' > /etc/ziproxy/ziproxy.conf
 Port = 8084
+RunAsUser = "nobody"
+RunAsGroup = "nobody"
 Nameservers = { "1.1.1.1", "1.0.0.1" }
 RedefineUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
 UseContentLength = false
@@ -58,7 +60,7 @@ ProcessHTML_NoComments = true
 ProcessHTML_TEXTAREA = true
 AllowLookChange = true
 ConvertToGrayscale = true
-ImageQuality = {20,15,15,10}
+ImageQuality = {10,5,5,3}
 
 ### MAYBE USED AS ADBLOCK OPTION ####
 # URLReplaceDataCT = "/etc/ziproxy/replace_ct.list"
@@ -76,7 +78,7 @@ ImageQuality = {20,15,15,10}
 
 ProcessJP2 = true
 ForceOutputNoJP2 = true
-JP2ImageQuality = {20,15,15,15}
+JP2ImageQuality = {10,5,5,3}
 EOF
 }
 
@@ -84,7 +86,7 @@ start_service (){
 	# start ziproxy in daemon-mode
 	sleep 1
 	echo -e "\033[0;33m[Info]\033[0m Starting ziproxy.."
-	ziproxy -d --config-file=/etc/ziproxy/ziproxy.conf
+	ziproxy -d --user=nobody --config-file=/etc/ziproxy/ziproxy.conf
 	sleep 3
 	if [[ $(netstat -tulpn | grep -c 'ziproxy') != 1 ]]; then
 		echo -e "\033[1;31m[Error]\033[0m Ziproxy failed to start, exiting.."
