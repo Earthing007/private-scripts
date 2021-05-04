@@ -105,7 +105,7 @@ print_info (){
 	echo ""
 	echo -e "\033[1;32m[Ok]\033[0m Installation success!\n"
 	echo -e "Ziproxy IP Address: \033[1;32m$(wget -4qO- ipinfo.io/ip)\033[0m"
-	echo -e "Ziproxy Port: $(netstat -tulpn | grep 'ziproxy' | awk '{print $4}' | sed -e 's/.*://')"
+	echo -e "Ziproxy Port: \033[0m$(netstat -tulpn | grep 'ziproxy' | awk '{print $4}' | sed -e 's/.*://')\033[0m"
 	echo -e "\n"
 }
 
