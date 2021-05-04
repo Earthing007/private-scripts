@@ -164,7 +164,9 @@ remove (){
 	ziproxy_port=$(netstat -tulpn | grep 'ziproxy' | awk '{print $4}' | sed -e 's/.*://')
 	[[ ! $(command -v lsof) ]] && apt install -y lsof
 	kill $(lsof -t -i :${ziproxy_port}) > /dev/null
-	rm -f /etc/systemd/system/ziproxy.service
+	systemctl stop rc-local
+	rm -f /etc/systemd/system/rc-local.service
+	rm -f /etc/rc.local
 	rm -rf /etc/ziproxy
 	rm -f /usr/local/bin/ziproxy
 	rm -rf ~/ziproxy*
