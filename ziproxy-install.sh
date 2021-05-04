@@ -136,6 +136,8 @@ remove (){
 	rm -f /usr/local/share/man/man1/ziproxy.1
 	rm -f /usr/local/share/man/man1/ziproxylogtool.1
 	rm -r /var/log/ziproxy
+	deluser ziproxy
+	groupdel ziproxy
 	echo -e "\033[0;33m[Info]\033[0m Ziproxy removed, done."
 	rm -f ~/install-ziproxy.sh
 }
