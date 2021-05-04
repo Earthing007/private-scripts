@@ -6,7 +6,7 @@ update (){
 	apt update
 	apt autoremove --fix-missing -y -f
 	apt upgrade -y
-	apt install -y build-essential cmake libgif-dev libpng-dev libjpeg-dev zlib1g-dev net-tools
+	apt install -y build-essential cmake libgif-dev libpng-dev libjpeg-dev zlib1g-dev net-tools libsasl2-dev
 	# compile and build libjasper
 	latest_version=$(wget -qO- 'https://api.github.com/repos/jasper-software/jasper/releases/latest' | grep 'name' | grep 'version' | awk '{print $2}' | sort -u | tr -d '",')
 	download_url=$(wget -qO- 'https://api.github.com/repos/jasper-software/jasper/releases/latest' | grep 'browser_download_url' | awk '{print $2}' | tr -d '"')
@@ -31,7 +31,7 @@ install_ziproxy (){
 	tar xf ziproxy-latest.tar.bz2
 	ziproxy_dir=$(ls | grep -v 'tar' | grep 'ziproxy-')
 	pushd $ziproxy_dir
-	./configure --with-jasper --with-sasl2=no
+	./configure --with-jasper --with-sasl2
 	make
 	make install
 	popd
@@ -41,10 +41,16 @@ configure (){
 	sleep 1
 	echo -e "\033[0;33m[Info]\033[0m Creating ziproxy config file.."
 	mkdir /etc/ziproxy
+	mkdir /var/log/ziproxy
+	adduser --system --shell /usr/sbin/nologin --no-create-home ziproxy
+	groupadd ziproxy
+	usermod -g ziproxy ziproxy
 	cat <<'EOF' > /etc/ziproxy/ziproxy.conf
 Port = 8084
-RunAsUser = "nobody"
-RunAsGroup = "nobody"
+RunAsUser = "ziproxy"
+RunAsGroup = "ziproxy"
+ErrorLog = "/var/log/ziproxy/error.log"
+AccessLog = "/var/log/ziproxy/access.log"
 Nameservers = { "1.1.1.1", "1.0.0.1" }
 RedefineUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
 UseContentLength = false
@@ -86,7 +92,7 @@ start_service (){
 	# start ziproxy in daemon-mode
 	sleep 1
 	echo -e "\033[0;33m[Info]\033[0m Starting ziproxy.."
-	ziproxy -d --user=nobody --config-file=/etc/ziproxy/ziproxy.conf
+	ziproxy -d --config-file=/etc/ziproxy/ziproxy.conf
 	sleep 3
 	if [[ $(netstat -tulpn | grep -c 'ziproxy') != 1 ]]; then
 		echo -e "\033[1;31m[Error]\033[0m Ziproxy failed to start, exiting.."
@@ -99,13 +105,13 @@ print_info (){
 	echo ""
 	echo -e "\033[1;32m[Ok]\033[0m Installation success!\n"
 	echo -e "Ziproxy IP Address: \033[1;32m$(wget -4qO- ipinfo.io/ip)\033[0m"
-	echo -e "Ziproxy Port: \033[1;32m$(netstat -tulpn | grep 'ziproxy' | awk '{print $4}' | sed -e 's/.*://')\033[0m"
+	echo -e "Ziproxy Port: $(netstat -tulpn | grep 'ziproxy' | awk '{print $4}' | sed -e 's/.*://')"
 	echo -e "\n"
 }
 
 clean (){
-	rm -f install-ziproxy.sh
-	rm -r ~/jasper*
+	rm -rf ~/jasper-2.0.32
+	rm -f ~/install-ziproxy.sh
 }
 
 install (){
@@ -125,7 +131,13 @@ remove (){
 	rm -rf /etc/ziproxy
 	rm -f /usr/local/bin/ziproxy
 	rm -rf ~/ziproxy*
+	rm -r ~/jasper*
+	rm -f /usr/local/bin/ziproxylogtool
+	rm -f /usr/local/share/man/man1/ziproxy.1
+	rm -f /usr/local/share/man/man1/ziproxylogtool.1
+	rm -r /var/log/ziproxy
 	echo -e "\033[0;33m[Info]\033[0m Ziproxy removed, done."
+	rm -f ~/install-ziproxy.sh
 }
 
 menu (){
