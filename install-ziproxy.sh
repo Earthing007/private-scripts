@@ -167,6 +167,7 @@ remove (){
 	systemctl stop rc-local
 	rm -f /etc/systemd/system/rc-local.service
 	systemctl daemon-reload
+	rm -f /usr/lib/systemd/system/rc.local.service
 	rm -f /etc/rc.local
 	rm -rf /etc/ziproxy
 	rm -f /usr/local/bin/ziproxy
