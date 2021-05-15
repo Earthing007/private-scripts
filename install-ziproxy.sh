@@ -45,12 +45,19 @@ configure (){
 	adduser --system --shell /usr/sbin/nologin --no-create-home ziproxy
 	groupadd ziproxy
 	usermod -g ziproxy ziproxy
+	randomuser=$(tr -dc A-Za-z < /dev/urandom | head -c 5)
+	randompass=$(tr -dc A-Za-z0-9 < /dev/urandom | head -c 8)
+	echo "$randomuser:$randompass" >> /etc/ziproxy/http.passwd
 	cat <<'EOF' > /etc/ziproxy/ziproxy.conf
 Port = 8084
+PIDFile = "/var/run/ziproxy.pid"
 RunAsUser = "ziproxy"
 RunAsGroup = "ziproxy"
 ErrorLog = "/var/log/ziproxy/error.log"
 AccessLog = "/var/log/ziproxy/access.log"
+AuthMode = 1
+AuthPasswdFile = "/etc/ziproxy/http.passwd"
+# AuthSASLConfPath = "/etc/ziproxy/sasl/"
 Nameservers = { "1.1.1.1", "1.0.0.1" }
 RedefineUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
 UseContentLength = false
@@ -68,23 +75,35 @@ AllowLookChange = true
 ConvertToGrayscale = true
 ImageQuality = {10,5,5,3}
 
-### MAYBE USED AS ADBLOCK OPTION ####
+# Can be used as ad-block (HTTP only) #
 # URLReplaceDataCT = "/etc/ziproxy/replace_ct.list"
 # URLReplaceDataCTList = {"image/jpeg", "image/gif", "image/png", "application/x-shockwave-flash"}
 # URLReplaceDataCTListAlsoXST = true
-#####################################
 
-### BLOCK URLS ###
+# Block bad URLs #
 # URLDeny = "/etc/ziproxy/deny.list"
-##################
 
-##############################################################################
 # JPEG 2000-specific options (require Ziproxy to be compiled with libjasper) #
-##############################################################################
-
 ProcessJP2 = true
 ForceOutputNoJP2 = true
 JP2ImageQuality = {10,5,5,3}
+EOF
+
+
+# Create systemd service
+	cat <<'EOF' > /etc/systemd/system/ziproxy.service
+[Unit]
+Description=Ziproxy Daemon Service
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/ziproxy.pid
+ExecStart=/usr/local/bin/ziproxy -d
+ExecStop=/usr/local/bin/ziproxy -k
+
+[Install]
+WantedBy=multi-user.target
 EOF
 }
 
@@ -92,48 +111,13 @@ start_service (){
 	sleep 1
 	echo -e "\033[0;33m[Info]\033[0m Starting ziproxy.."
 	sleep 2
-	ziproxy -d --config-file=/etc/ziproxy/ziproxy.conf
+	systemctl daemon-reload
+	systemctl start ziproxy
+	systemctl enable ziproxy
 	if [[ $(netstat -tulpn | grep -c 'ziproxy') != 1 ]]; then
 		echo -e "\033[1;31m[Error]\033[0m Ziproxy failed to start, exiting.."
 		sleep 1 && exit 1
 	fi
-	# Add rc.local
-	cat <<'EOF' > /etc/systemd/system/rc-local.service
-[Unit]
-Description=/etc/rc.local
-ConditionPathExists=/etc/rc.local
- 
-[Service]
-Type=forking
-ExecStart=/etc/rc.local start
-TimeoutSec=0
-StandardOutput=tty
-RemainAfterExit=yes
-SysVStartPriority=99
- 
-[Install]
-WantedBy=multi-user.target
-EOF
-	cat <<'EOF' > /etc/rc.local
-#!/bin/sh -e
-#
-# rc.local
-#
-# This script is executed at the end of each multiuser runlevel.
-# Make sure that the script will "exit 0" on success or any other
-# value on error.
-#
-# In order to enable or disable this script just change the execution
-# bits.
-#
-# By default this script does nothing.
-
-exit 0
-EOF
-	chmod +x /etc/rc.local
-	systemctl start rc-local
-
-	sed -i '$ i\/usr/local/bin/ziproxy -d --config-file=/etc/ziproxy/ziproxy.conf' /etc/rc.local
 }
 
 print_info (){
@@ -142,6 +126,9 @@ print_info (){
 	echo -e "\033[1;32m[Ok]\033[0m Installation success!\n"
 	echo -e "Ziproxy IP Address: \033[1;32m$(wget -4qO- ipinfo.io/ip)\033[0m"
 	echo -e "Ziproxy Port: \033[1;32m$(netstat -tulpn | grep 'ziproxy' | awk '{print $4}' | sed -e 's/.*://')\033[0m"
+	echo -e "\033[0;33mAuthentication Details:\033[0m"
+	echo -e "Username : \033[1;32m$randomuser\033[0m"
+	echo -e "Password : \033[1;32m$randompass\033[0m"	
 	echo -e "\n"
 }
 
@@ -164,11 +151,7 @@ remove (){
 	ziproxy_port=$(netstat -tulpn | grep 'ziproxy' | awk '{print $4}' | sed -e 's/.*://')
 	[[ ! $(command -v lsof) ]] && apt install -y lsof
 	kill $(lsof -t -i :${ziproxy_port}) > /dev/null
-	systemctl stop rc-local
-	rm -f /etc/systemd/system/rc-local.service
 	systemctl daemon-reload
-	rm -f /usr/lib/systemd/system/rc.local.service
-	rm -f /etc/rc.local
 	rm -rf /etc/ziproxy
 	rm -f /usr/local/bin/ziproxy
 	rm -rf ~/ziproxy*
@@ -177,6 +160,9 @@ remove (){
 	rm -f /usr/local/share/man/man1/ziproxy.1
 	rm -f /usr/local/share/man/man1/ziproxylogtool.1
 	rm -r /var/log/ziproxy
+	rm -f /etc/systemd/system/multi-user.target.wants/ziproxy.service
+	rm -f /etc/systemd/system/ziproxy.service
+	systemctl daemon-reload
 	echo -e "\033[0;33m[Info]\033[0m Ziproxy removed, done."
 	rm -f ~/install-ziproxy.sh
 }
