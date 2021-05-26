@@ -129,18 +129,18 @@ install_vless (){
 
 # Install SS with v2ray-plugin
 install_ss (){
-	rm -f ss.sh && curl -o ss.sh 'https://9acd8eb3382190b929d9d1b53dcd92d63658eaea@raw.githubusercontent.com/Earthing007/private-scripts/main/ss-v2ray' && chmod +x ss.sh && ./ss.sh
+	rm -f ss.sh && curl -o ss.sh 'https://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@raw.githubusercontent.com/Earthing007/private-scripts/main/ss-v2ray' && chmod +x ss.sh && ./ss.sh
 }
 
 # Install SS with xray-plugin
 install_ss_xray (){
-	rm -f ss_xray.sh && curl -o ss_xray.sh 'https://9acd8eb3382190b929d9d1b53dcd92d63658eaea@raw.githubusercontent.com/Earthing007/private-scripts/main/ss-xray' && chmod +x ss_xray.sh && ./ss_xray.sh
+	rm -f ss_xray.sh && curl -o ss_xray.sh 'https://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@raw.githubusercontent.com/Earthing007/private-scripts/main/ss-xray' && chmod +x ss_xray.sh && ./ss_xray.sh
 }
 
 # Misc
 misc (){
 	if [[ ! -f /etc/iptables/rules.v4 ]]; then
-		rm -f misc.sh && curl -o misc.sh 'https://9acd8eb3382190b929d9d1b53dcd92d63658eaea@raw.githubusercontent.com/Earthing007/private-scripts/main/misc.sh' && chmod +x misc.sh && ./misc.sh
+		rm -f misc.sh && curl -o misc.sh 'https://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@raw.githubusercontent.com/Earthing007/private-scripts/main/misc.sh' && chmod +x misc.sh && ./misc.sh
 		rm -f misc.sh
 	else
 		:
