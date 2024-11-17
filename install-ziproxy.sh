@@ -13,12 +13,12 @@ update (){
 	wget -O jasper-${latest_version}.tar.gz $download_url
 	tar xf jasper-${latest_version}.tar.gz && rm -f jasper-${latest_version}.tar.gz
 	jasper_dir=$(ls | grep -v 'tar' | grep 'jasper-')
-	cd $jasper_dir && mkdir build
+	mkdir -p ~/jasper-build
 	SOURCE_DIR=~/$jasper_dir
 	INSTALL_DIR=/usr
 	BUILD_DIR=~/$jasper_dir/build
 	OPTIONS=
-	cmake -G "Unix Makefiles" -H$SOURCE_DIR -B$BUILD_DIR -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR $OPTIONS
+	cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR $SOURCE_DIR $OPTIONS
 	cd $BUILD_DIR
 	make clean all
 	make install
