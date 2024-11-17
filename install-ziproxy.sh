@@ -18,7 +18,7 @@ update (){
 	INSTALL_DIR=/usr
 	BUILD_DIR=~/$jasper_dir/build
 	OPTIONS=
-	cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR $SOURCE_DIR $OPTIONS
+	cmake -G "Unix Makefiles" -H$SOURCE_DIR -B$BUILD_DIR -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR $OPTIONS
 	cd $BUILD_DIR
 	make clean all
 	make install
