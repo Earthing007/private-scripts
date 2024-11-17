@@ -16,7 +16,7 @@ update (){
 	mkdir -p ~/jasper-build
 	SOURCE_DIR=~/$jasper_dir
 	INSTALL_DIR=/usr
-	BUILD_DIR=~/$jasper_dir/build
+	BUILD_DIR=~/jasper-build
 	OPTIONS=
 	cmake -G "Unix Makefiles" -H$SOURCE_DIR -B$BUILD_DIR -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR $OPTIONS
 	cd $BUILD_DIR
